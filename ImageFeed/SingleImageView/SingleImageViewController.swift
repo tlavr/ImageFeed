@@ -62,8 +62,6 @@ final class SingleImageViewController : UIViewController {
         let y = (newContentSize.height - visibleRectSize.height) / 2
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
         scrollView.layoutIfNeeded()
-        // Animation = true triggers scrollViewDidEndZooming and centers image on the screen,
-        // so less visible image jumps after futher zooming
         scrollView.setZoomScale(scale, animated: true)
     }
 }
