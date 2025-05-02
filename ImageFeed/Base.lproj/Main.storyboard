@@ -166,7 +166,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0eM-c1-n35" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-402.29007633587787" y="-1995.0704225352113"/>
+            <point key="canvasLocation" x="-425" y="-2283"/>
         </scene>
         <!--Web View View Controller-->
         <scene sceneID="meP-27-YyV">
@@ -175,14 +175,41 @@
                     <view key="view" contentMode="scaleToFill" id="Glo-aW-uBI">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <wkWebView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9dp-ud-PKK">
+                                <rect key="frame" x="0.0" y="103" width="393" height="749"/>
+                                <color key="backgroundColor" name="YP White (iOS)"/>
+                                <wkWebViewConfiguration key="configuration">
+                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
+                                    <wkPreferences key="preferences"/>
+                                </wkWebViewConfiguration>
+                            </wkWebView>
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="8uF-dd-7Ix">
+                                <rect key="frame" x="0.0" y="103" width="393" height="4"/>
+                                <color key="progressTintColor" name="YP Background (iOS)"/>
+                            </progressView>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="1VV-3a-GBZ"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="9dp-ud-PKK" secondAttribute="trailing" id="4mY-6L-zQ2"/>
+                            <constraint firstItem="1VV-3a-GBZ" firstAttribute="trailing" secondItem="8uF-dd-7Ix" secondAttribute="trailing" id="bug-yw-wPb"/>
+                            <constraint firstAttribute="bottom" secondItem="9dp-ud-PKK" secondAttribute="bottom" id="kUD-Jq-6ku"/>
+                            <constraint firstItem="8uF-dd-7Ix" firstAttribute="top" secondItem="1VV-3a-GBZ" secondAttribute="top" id="mLc-Lu-Dk4"/>
+                            <constraint firstItem="8uF-dd-7Ix" firstAttribute="leading" secondItem="1VV-3a-GBZ" secondAttribute="leading" id="obt-eo-VRQ"/>
+                            <constraint firstItem="9dp-ud-PKK" firstAttribute="top" secondItem="1VV-3a-GBZ" secondAttribute="top" id="rAH-aD-UjD"/>
+                            <constraint firstItem="9dp-ud-PKK" firstAttribute="leading" secondItem="Glo-aW-uBI" secondAttribute="leading" id="v1d-uy-LLC"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="MrR-Ah-wmA"/>
+                    <connections>
+                        <outlet property="progressView" destination="8uF-dd-7Ix" id="QoD-V9-hP9"/>
+                        <outlet property="webView" destination="9dp-ud-PKK" id="dW4-UH-1bQ"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="8gG-GG-eSY" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="418" y="-2274"/>
+            <point key="canvasLocation" x="563" y="-2283"/>
         </scene>
         <!--ProfileView-->
         <scene sceneID="5hQ-0w-y9k">
@@ -310,7 +337,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="WVR-d3-M0F" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1329.0076335877861" y="-1995.0704225352113"/>
+            <point key="canvasLocation" x="-1352" y="-2283"/>
         </scene>
     </scenes>
     <resources>
@@ -322,6 +349,9 @@
         <image name="ProfileTabActiveImage" width="30" height="30"/>
         <image name="ShareButton" width="34" height="34"/>
         <image name="image_bg_gradient" width="514.5" height="45"/>
+        <namedColor name="YP Background (iOS)">
+            <color red="0.10196078431372549" green="0.10588235294117647" blue="0.13333333333333333" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <namedColor name="YP Black (iOS)">
             <color red="0.10196078431372549" green="0.10588235294117647" blue="0.13333333333333333" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
