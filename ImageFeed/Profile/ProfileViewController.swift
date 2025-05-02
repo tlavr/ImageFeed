@@ -9,6 +9,7 @@ import UIKit
 
 final class ProfileViewController: UIViewController {
     // MARK: - Private properties
+    private let tokenStorage = OAuth2TokenStorage()
     private lazy var profileImageView: UIImageView = {
         let profileImage = UIImage(named: "ProfilePicture")
         let imageView = UIImageView(image: profileImage)
@@ -47,7 +48,7 @@ final class ProfileViewController: UIViewController {
         return textLabel
     } ()
     
-    // MARK: - View state handlers
+    // MARK: - View lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         addSubviews()
@@ -91,5 +92,6 @@ final class ProfileViewController: UIViewController {
     
     @objc
     private func didTapLogoutButton(_ sender: Any) {
-        print("Logout button tapped")   }
+        tokenStorage.reset() // To be replaced in next sprints, only for testing purposes in sprint 10
+    }
 }

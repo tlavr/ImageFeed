@@ -8,15 +8,15 @@
 import UIKit
 
 final class OAuth2Service {
-    // MARK: -Public properties
+    // MARK: - Public properties
     static let shared = OAuth2Service()
     
-    // MARK: -Private properties
+    // MARK: - Private properties
     private enum JsonError: Error {
         case decoderError
     }
     
-    // MARK: -Public methods
+    // MARK: - Public methods
     func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
         guard let URLRequest = generateTokenRequest(code: code) else { return }
         
@@ -36,7 +36,7 @@ final class OAuth2Service {
         task.resume()
     }
     
-    // MARK: -Private methods
+    // MARK: - Private methods
     private init() {}
     
     private func generateTokenRequest(code: String) -> URLRequest? {
@@ -44,7 +44,6 @@ final class OAuth2Service {
             assertionFailure("Generate token request URLComponent initialization failed")
             return nil
         }
-        
         urlComponents.queryItems = [
             URLQueryItem(name: "client_id", value: Constants.accessKey),
             URLQueryItem(name: "client_secret", value: Constants.secretKey),
@@ -52,15 +51,12 @@ final class OAuth2Service {
             URLQueryItem(name: "code", value: code),
             URLQueryItem(name: "grant_type", value: "authorization_code")
         ]
-        
         guard let url = urlComponents.url else {
             assertionFailure("Generate token request URL initialization failed")
             return nil
         }
-        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        
         return request
     }
 }

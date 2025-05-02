@@ -6,17 +6,17 @@
 //
 
 import UIKit
-import WebKit
+@preconcurrency import WebKit
 
 final class WebViewViewController: UIViewController {
-    // MARK: -IBOutlets
+    // MARK: - IBOutlets
     @IBOutlet private var webView: WKWebView!
     @IBOutlet private var progressView: UIProgressView!
     
-    // MARK: -Public properties
+    // MARK: - Public properties
     var authDelegate: WebViewViewControllerDelegate?
     
-    // MARK: -View Lifecycle
+    // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         loadAuthView()
@@ -40,12 +40,12 @@ final class WebViewViewController: UIViewController {
             context: nil)
     }
     
-    // MARK: -IBActions
+    // MARK: - IBActions
     @IBAction private func didTapBackButton(_ sender: Any?) {
         authDelegate?.webViewViewControllerDidCancel(self)
     }
     
-    // MARK: -Public methods
+    // MARK: - Public methods
     override func observeValue(
         forKeyPath keyPath: String?,
         of object: Any?,
@@ -59,7 +59,7 @@ final class WebViewViewController: UIViewController {
         }
     }
     
-    // MARK: -Private methods
+    // MARK: - Private methods
     private func updateProgress() {
         progressView.progress = Float(webView.estimatedProgress)
         progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
@@ -70,19 +70,16 @@ final class WebViewViewController: UIViewController {
             assertionFailure("Load auth view URLComponent initialization failed")
             return
         }
-        
         urlComponents.queryItems = [
             URLQueryItem(name: "client_id", value: Constants.accessKey),
             URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
             URLQueryItem(name: "response_type", value: "code"),
             URLQueryItem(name: "scope", value: Constants.accessScope)
         ]
-        
         guard let url = urlComponents.url else {
             assertionFailure("Load auth view URL initialization failed")
             return
         }
-        
         let request = URLRequest(url: url)
         webView.load(request)
     }
@@ -95,7 +92,7 @@ final class WebViewViewController: UIViewController {
             let items = urlComponents.queryItems,
             let codeItem = items.first(where: { $0.name == "code" })
         {
-            return codeItem.value                                         
+            return codeItem.value
         } else {
             return nil
         }
