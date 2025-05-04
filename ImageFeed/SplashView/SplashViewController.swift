@@ -60,7 +60,6 @@ extension SplashViewController {
             }
             viewController.modalPresentationStyle = .fullScreen
             viewController.modalTransitionStyle = .crossDissolve
-            viewController.isModalInPresentation = true
             viewController.delegate = self
         } else {
             super.prepare(for: segue, sender: sender)
