@@ -8,9 +8,6 @@
 import UIKit
 
 final class AuthViewController: UIViewController {
-    // MARK: - IBOutlets
-    @IBOutlet var loginButton: UIButton!
-    
     // MARK: - Public properties
     var delegate: AuthViewControllerDelegate?
     
@@ -23,11 +20,6 @@ final class AuthViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureBackButton()
-    }
-    
-    // MARK: - IBActions
-    @IBAction func didTapLoginButton(_ sender: Any) {
-        performSegue(withIdentifier: showWebViewSegueIdentifier, sender: nil)
     }
     
     // MARK: - Public methods

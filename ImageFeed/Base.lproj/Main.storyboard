@@ -148,7 +148,6 @@
                                     <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
-                                    <action selector="didTapLoginButton:" destination="K6q-am-0kG" eventType="touchUpInside" id="kb9-Et-oei"/>
                                     <segue destination="cQf-kZ-oHq" kind="show" identifier="ShowWebView" id="Bza-Fc-YQf"/>
                                 </connections>
                             </button>
@@ -164,9 +163,6 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="pVp-5J-P2m"/>
-                    <connections>
-                        <outlet property="loginButton" destination="te8-80-jjo" id="MbM-YT-VS5"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0eM-c1-n35" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
