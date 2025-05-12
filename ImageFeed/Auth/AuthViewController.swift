@@ -52,16 +52,18 @@ extension AuthViewController: WebViewViewControllerDelegate {
         oauth2Service.fetchOAuthToken(code: code) { [weak self] result in
             DispatchQueue.main.async {
                 guard let self = self else { return }
+                ProgressHUD.dismiss()
                 switch result {
                 case .success(let token):
                     self.tokenStorage.store(token: token)
                     self.delegate?.didAuthenticate(self)
                 case .failure(let error):
-                    assertionFailure("Error occured during data loading: \(error)")
+                    assertionFailure("Error occured during token data loading: \(error)")
                 }
             }
         }
     }
+    
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
         vc.dismiss(animated: true)
     }

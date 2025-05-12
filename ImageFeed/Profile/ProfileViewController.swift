@@ -10,6 +10,7 @@ import UIKit
 final class ProfileViewController: UIViewController {
     // MARK: - Private properties
     private let tokenStorage = OAuth2TokenStorage()
+    private let profileStorage = ProfileStorage()
     private lazy var profileImageView: UIImageView = {
         let profileImage = UIImage(named: "ProfilePicture")
         let imageView = UIImageView(image: profileImage)
@@ -28,21 +29,35 @@ final class ProfileViewController: UIViewController {
     } ()
     private lazy var usernameLabel: UILabel = {
         let usernameLabel = UILabel()
-        usernameLabel.text = "Екатерина Новикова"
+        if let name = profileStorage.firstName,
+           let lastName = profileStorage.lastName {
+            usernameLabel.text = name+" "+lastName
+        } else {
+            usernameLabel.text = "Екатерина Новикова"
+        }
         usernameLabel.font = .systemFont(ofSize: 23, weight: .bold)
         usernameLabel.textColor = .ypWhite
         return usernameLabel
     } ()
     private lazy var accountNameLabel: UILabel = {
         let accountLabel = UILabel()
-        accountLabel.text = "@ekaterina_nov"
+        if let username = profileStorage.username {
+            accountNameLabel.text = username
+        } else {
+            accountLabel.text = "@ekaterina_nov"
+        }
         accountLabel.font = .systemFont(ofSize: 13, weight: .regular)
         accountLabel.textColor = .ypGray
         return accountLabel
     } ()
     private lazy var customTextLabel: UILabel = {
         let textLabel = UILabel()
-        textLabel.text = "Hello, world!"
+        if let id = profileStorage.userID,
+           let totalPhotos = profileStorage.totalPhotos {
+            customTextLabel.text = "User with ID \(id) has \(totalPhotos) photos"
+        } else {
+            textLabel.text = "Hello, world!"
+        }
         textLabel.font = .systemFont(ofSize: 13, weight: .regular)
         textLabel.textColor = .ypWhite
         return textLabel
@@ -53,6 +68,21 @@ final class ProfileViewController: UIViewController {
         super.viewDidLoad()
         addSubviews()
         setupConstraints()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let name = profileStorage.firstName,
+           let lastName = profileStorage.lastName {
+            usernameLabel.text = name+" "+lastName
+        }
+        if let username = profileStorage.username {
+            accountNameLabel.text = username
+        }
+        if let id = profileStorage.userID,
+           let totalPhotos = profileStorage.totalPhotos {
+            customTextLabel.text = "User with ID \(id) has \(totalPhotos) photos"
+        }
     }
     
     // MARK: - Private methods
