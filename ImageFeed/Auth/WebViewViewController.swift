@@ -14,7 +14,7 @@ final class WebViewViewController: UIViewController {
     @IBOutlet private var progressView: UIProgressView!
     
     // MARK: - Public properties
-    var authDelegate: WebViewViewControllerDelegate?
+    weak var authDelegate: WebViewViewControllerDelegate?
     
     // MARK: - View Lifecycle
     override func viewDidLoad() {

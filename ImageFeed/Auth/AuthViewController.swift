@@ -10,7 +10,7 @@ import ProgressHUD
 
 final class AuthViewController: UIViewController {
     // MARK: - Public properties
-    var delegate: AuthViewControllerDelegate?
+    weak var delegate: AuthViewControllerDelegate?
     
     // MARK: - Private properties
     private let showWebViewSegueIdentifier = "ShowWebView"
@@ -49,19 +49,17 @@ final class AuthViewController: UIViewController {
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
+        navigationController?.popViewController(animated: true)
         ProgressHUD.animate()
-        oauth2Service.fetchOAuthToken(code: code) { [weak self, vc] result in
-            DispatchQueue.main.async {
-                vc.dismiss(animated: true)
-                ProgressHUD.dismiss()
-                guard let self = self else { return }
-                switch result {
-                case .success(let token):
-                    self.tokenStorage.store(token: token)
-                    self.delegate?.didAuthenticate(self)
-                case .failure(let error):
-                    assertionFailure("Error occured during token data loading: \(error)")
-                }
+        oauth2Service.fetchOAuthToken(code: code) { [weak self] result in
+            ProgressHUD.dismiss()
+            guard let self = self else { return }
+            switch result {
+            case .success(let token):
+                self.tokenStorage.store(token: token)
+                self.delegate?.didAuthenticate(self)
+            case .failure(let error):
+                assertionFailure("Error occured during token data loading: \(error)")
             }
         }
     }
