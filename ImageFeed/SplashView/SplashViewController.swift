@@ -27,7 +27,6 @@ final class SplashViewController: UIViewController {
         setNeedsStatusBarAppearanceUpdate()
         if tokenStorage.token != nil {
             requestProfile()
-            switchToTabBarController()
         }
         else {
             performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
@@ -77,8 +76,8 @@ final class SplashViewController: UIViewController {
                         userID: profileData.userID,
                         username: profileData.username,
                         firstName: profileData.firstName,
-                        lastName: profileData.lastName,
-                        totalPhotos: profileData.totalPhotos
+                        lastName: profileData.lastName ?? "",
+                        totalPhotos: profileData.totalPhotos ?? 0
                     )
                     completion(.success(profile))
                 } catch {
@@ -92,13 +91,28 @@ final class SplashViewController: UIViewController {
     }
     
     private func requestProfile() {
-        fetchProfileData() { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let profileData):
-                    print("Profile data has been loaded successfully: \(profileData)")
-                case .failure(let error):
-                    assertionFailure("Error occured during profile data loading: \(error)")
+        fetchProfileData() { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let profileData):
+                self.navigationController?.popViewController(animated: true)
+                print("Profile data has been successfully loaded: \(profileData)")
+                self.switchToTabBarController()
+            case .failure(let error):
+                print("Error occured during profile data loading: \(error)")
+                let alert = UIAlertController(
+                    title: "Что-то пошло не так(",
+                    message: "Не удалось войти в систему",
+                    preferredStyle: .alert)
+                let action = UIAlertAction(title: "ОК", style: .default) { [weak self] _ in
+                    guard let self = self else { return }
+                    self.performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
+                }
+                alert.addAction(action)
+                if self.presentedViewController == nil {
+                    self.present(alert, animated: true, completion: nil)
+                } else {
+                    self.presentedViewController?.present(alert, animated: true, completion: nil)
                 }
             }
         }
@@ -107,9 +121,7 @@ final class SplashViewController: UIViewController {
 
 extension SplashViewController: AuthViewControllerDelegate{
     func didAuthenticate(_ vc: AuthViewController) {
-        navigationController?.popViewController(animated: true)
         requestProfile()
-        switchToTabBarController()
     }
 }
 
@@ -136,8 +148,8 @@ struct ProfileDataResponseBody: Decodable {
     let userID: String
     let username: String
     let firstName: String
-    let lastName: String
-    let totalPhotos: Int
+    let lastName: String?
+    let totalPhotos: Int?
     
     private enum CodingKeys: String, CodingKey {
         case userID = "id"
