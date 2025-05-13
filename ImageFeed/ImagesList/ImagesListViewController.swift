@@ -11,7 +11,7 @@ final class ImagesListViewController: UIViewController {
     // MARK: - IBOutlets
     @IBOutlet private var tableView: UITableView!
     
-    // MARK: -Private properties
+    // MARK: - Private properties
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
     private let photosName: [String] = Array(0..<20).map{ "\($0)" }
     private lazy var dateFormatter: DateFormatter = {
@@ -21,7 +21,7 @@ final class ImagesListViewController: UIViewController {
         return formatter
     }()
     
-    // MARK: - View state handlers
+    // MARK: - View lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.backgroundColor = UIColor(named: "YP Black (iOS)")
@@ -38,8 +38,7 @@ final class ImagesListViewController: UIViewController {
             else {
                 assertionFailure("Invalid segue destination")
                 return
-            }
-            
+            }            
             let image = UIImage(named: photosName[indexPath.row])
             viewController.image = image
         } else {
