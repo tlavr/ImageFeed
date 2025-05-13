@@ -49,11 +49,12 @@ final class AuthViewController: UIViewController {
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        vc.dismiss(animated: true)
-        oauth2Service.fetchOAuthToken(code: code) { [weak self] result in
+        ProgressHUD.animate()
+        oauth2Service.fetchOAuthToken(code: code) { [weak self, vc] result in
             DispatchQueue.main.async {
-                guard let self = self else { return }
+                vc.dismiss(animated: true)
                 ProgressHUD.dismiss()
+                guard let self = self else { return }
                 switch result {
                 case .success(let token):
                     self.tokenStorage.store(token: token)
