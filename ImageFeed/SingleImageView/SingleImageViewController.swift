@@ -23,7 +23,7 @@ final class SingleImageViewController : UIViewController {
     @IBOutlet var scrollView: UIScrollView!
     @IBOutlet var shareButton: UIButton!
     
-    // MARK: - View state handlers
+    // MARK: - View lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         shareButton.setTitle("", for: .normal)
@@ -46,7 +46,7 @@ final class SingleImageViewController : UIViewController {
         present(activityVC, animated: true)
     }
     
-    // MARK: - Private functions
+    // MARK: - Private methods
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
         let minZoomScale = scrollView.minimumZoomScale
         let maxZoomScale = scrollView.maximumZoomScale
@@ -56,14 +56,12 @@ final class SingleImageViewController : UIViewController {
         let hScale = visibleRectSize.width / imageSize.width
         let vScale = visibleRectSize.height / imageSize.height
         let scale = min(maxZoomScale, max(minZoomScale, min(hScale, vScale)))
-       
+        
         let newContentSize = scrollView.contentSize
         let x = (newContentSize.width - visibleRectSize.width) / 2
         let y = (newContentSize.height - visibleRectSize.height) / 2
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
         scrollView.layoutIfNeeded()
-        // Animation = true triggers scrollViewDidEndZooming and centers image on the screen,
-        // so less visible image jumps after futher zooming
         scrollView.setZoomScale(scale, animated: true)
     }
 }
