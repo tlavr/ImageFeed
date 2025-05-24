@@ -29,9 +29,8 @@ final class ProfileViewController: UIViewController {
     } ()
     private lazy var usernameLabel: UILabel = {
         let usernameLabel = UILabel()
-        if let name = profileStorage.firstName,
-           let lastName = profileStorage.lastName {
-            usernameLabel.text = name+" "+lastName
+        if let loginname = profileStorage.loginname {
+            usernameLabel.text = loginname
         } else {
             usernameLabel.text = "Екатерина Новикова"
         }
@@ -41,8 +40,8 @@ final class ProfileViewController: UIViewController {
     } ()
     private lazy var accountNameLabel: UILabel = {
         let accountLabel = UILabel()
-        if let username = profileStorage.username {
-            accountNameLabel.text = username
+        if let name = profileStorage.name {
+            accountLabel.text = name
         } else {
             accountLabel.text = "@ekaterina_nov"
         }
@@ -52,9 +51,8 @@ final class ProfileViewController: UIViewController {
     } ()
     private lazy var customTextLabel: UILabel = {
         let textLabel = UILabel()
-        if let id = profileStorage.userID,
-           let totalPhotos = profileStorage.totalPhotos {
-            customTextLabel.text = "User with ID \(id) has \(totalPhotos) photos"
+        if let bio = profileStorage.bio {
+            textLabel.text = bio
         } else {
             textLabel.text = "Hello, world!"
         }
@@ -68,20 +66,10 @@ final class ProfileViewController: UIViewController {
         super.viewDidLoad()
         addSubviews()
         setupConstraints()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        if let name = profileStorage.firstName,
-           let lastName = profileStorage.lastName {
-            usernameLabel.text = name+" "+lastName
-        }
-        if let username = profileStorage.username {
-            accountNameLabel.text = username
-        }
-        if let id = profileStorage.userID,
-           let totalPhotos = profileStorage.totalPhotos {
-            customTextLabel.text = "User with ID \(id) has \(totalPhotos) photos"
+        if let userProfile = profileStorage.getProfile() {
+            usernameLabel.text = userProfile.name
+            accountNameLabel.text = userProfile.loginname
+            customTextLabel.text = userProfile.bio
         }
     }
     
