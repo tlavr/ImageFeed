@@ -14,23 +14,18 @@ final class ProfileService {
     private var task: URLSessionTask?
     private var lastToken: String?
     
-    private enum ProfileServiceError: Error {
-        case repeatedRequest
-        case invalidUrlRequest
-    }
-    
     // MARK: -Public methods
     func fetchProfile(_ token: String, completion: @escaping (Result<ProfileModel, Error>) -> Void) {
         assert(Thread.isMainThread)
         guard lastToken != token else {
-            completion(.failure(ProfileServiceError.repeatedRequest))
+            completion(.failure(CommonErrors.repeatedRequest))
             return
         }
         task?.cancel()
         lastToken = token
         
         guard let URLRequest = generateProfileRequest(token) else {
-            completion(.failure(ProfileServiceError.invalidUrlRequest))
+            completion(.failure(CommonErrors.invalidUrlRequest))
             return
         }
         
@@ -64,12 +59,12 @@ final class ProfileService {
     
     private func generateProfileRequest(_ token: String) -> URLRequest? {
         guard var urlComponents = URLComponents(url: Constants.defaultBaseURL, resolvingAgainstBaseURL: true) else {
-            assertionFailure("Generate profile request URLComponent initialization failed")
+            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.urlComponent)
             return nil
         }
         urlComponents.path = "/me"
         guard let url = urlComponents.url else {
-            assertionFailure("Generate token request URL initialization failed")
+            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.url)
             return nil
         }
         var request = URLRequest(url: url)

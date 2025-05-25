@@ -28,7 +28,7 @@ final class AuthViewController: UIViewController {
             guard
                 let viewController = segue.destination as? WebViewViewController
             else {
-                assertionFailure("Failed to prepare for \(showWebViewSegueIdentifier)")
+                ErrorLoggingService.shared.log(from: String(describing: self), with: .SeguePreparation, error: CommonErrors.seguePreparation(showWebViewSegueIdentifier))
                 return
             }
             viewController.authDelegate = self
@@ -58,12 +58,13 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 self.tokenStorage.store(token: token)
                 self.delegate?.didAuthenticate(self)
             case .failure(let error):
-                assertionFailure("Error occured during token data loading: \(error)")
+                ErrorLoggingService.shared.log(from: String(describing: self), with: .Network, error: error)
             }
         }
     }
     
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
-        vc.dismiss(animated: true)
+        vc.dismiss(animated: false)
+        delegate?.showAlert(self)
     }
 }

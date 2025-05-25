@@ -16,23 +16,19 @@ final class ProfileImageService {
     private(set) var avatarURL: String?
     private var task: URLSessionTask?
     private var lastUsername: String?
-    private enum ProfileImageServiceError: Error {
-        case repeatedRequest
-        case invalidUrlRequest
-    }
     
     //MARK: -Public methods
     func fetchProfileImageURL(username: String, _ completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
         guard lastUsername != username else {
-            completion(.failure(ProfileImageServiceError.repeatedRequest))
+            completion(.failure(CommonErrors.repeatedRequest))
             return
         }
         task?.cancel()
         lastUsername = username
         
         guard let URLRequest = generateProfileImageRequest(username) else {
-            completion(.failure(ProfileImageServiceError.invalidUrlRequest))
+            completion(.failure(CommonErrors.invalidUrlRequest))
             return
         }
         
@@ -62,16 +58,16 @@ final class ProfileImageService {
     
     private func generateProfileImageRequest(_ username: String) -> URLRequest? {
         guard let token = tokenStorage.token else {
-            assertionFailure("Token reading from Storage failed")
+            ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
             return nil
         }
         guard var urlComponents = URLComponents(url: Constants.defaultBaseURL, resolvingAgainstBaseURL: true) else {
-            assertionFailure("Generate profile request URLComponent initialization failed")
+            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.urlComponent)
             return nil
         }
         urlComponents.path = "/users/\(username)"
         guard let url = urlComponents.url else {
-            assertionFailure("Generate token request URL initialization failed")
+            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.url)
             return nil
         }
         var request = URLRequest(url: url)

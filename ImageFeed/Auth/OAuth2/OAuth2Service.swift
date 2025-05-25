@@ -14,23 +14,19 @@ final class OAuth2Service {
     // MARK: - Private properties
     private var task: URLSessionTask?
     private var lastCode: String?
-    private enum AuthServiceError: Error {
-        case repeatedRequest
-        case invalidUrlRequest
-    }
     
     // MARK: - Public methods
     func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
         guard lastCode != code else {
-            completion(.failure(AuthServiceError.repeatedRequest))
+            completion(.failure(CommonErrors.repeatedRequest))
             return
         }
         task?.cancel()
         lastCode = code
         
         guard let URLRequest = generateTokenRequest(code: code) else {
-            completion(.failure(AuthServiceError.invalidUrlRequest))
+            completion(.failure(CommonErrors.invalidUrlRequest))
             return
         }
         
@@ -54,7 +50,7 @@ final class OAuth2Service {
     
     private func generateTokenRequest(code: String) -> URLRequest? {
         guard var urlComponents = URLComponents(string: AuthConstants.tokenRequestURLString) else {
-            assertionFailure("Generate token request URLComponent initialization failed")
+            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.urlComponent)
             return nil
         }
         urlComponents.queryItems = [
@@ -65,7 +61,7 @@ final class OAuth2Service {
             URLQueryItem(name: "grant_type", value: "authorization_code")
         ]
         guard let url = urlComponents.url else {
-            assertionFailure("Generate token request URL initialization failed")
+            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.url)
             return nil
         }
         var request = URLRequest(url: url)
@@ -91,3 +87,4 @@ struct OAuthTokenResponseBody: Decodable {
         case createdAt = "created_at"
     }
 }
+

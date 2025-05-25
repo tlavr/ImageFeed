@@ -34,7 +34,7 @@ final class SplashViewController: UIViewController {
     // MARK: - Private methods
     private func switchToTabBarController() {
         guard let window = UIApplication.shared.windows.first else {
-            assertionFailure("Invalid window configuration")
+            ErrorLoggingService.shared.log(from: String(describing: self), with: .Window, error: CommonErrors.windowConfiguration)
             return
         }
         let tabBarController = UIStoryboard(name: "Main", bundle: .main)
@@ -42,11 +42,27 @@ final class SplashViewController: UIViewController {
         window.rootViewController = tabBarController
     }
     
+    private func showErrorAlert(_ vc: UIViewController) {
+        let alert = UIAlertController(
+            title: "Что-то пошло не так(",
+            message: "Не удалось войти в систему",
+            preferredStyle: .alert)
+        let action = UIAlertAction(title: "ОК", style: .default) { [weak alert] _ in
+            guard let alert else { return }
+            alert.dismiss(animated: true)
+        }
+        alert.addAction(action)
+        if self.presentedViewController == nil {
+            self.performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
+        }
+        self.presentedViewController?.present(alert, animated: true, completion: nil)
+    }
+    
     private func requestProfile() {
         guard
             let token = tokenStorage.token
         else {
-            assertionFailure("Token reading from Storage failed")
+            ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
             return
         }
         UIBlockingProgressHUD.show()
@@ -61,21 +77,8 @@ final class SplashViewController: UIViewController {
                 ProfileImageService.shared.fetchProfileImageURL(username: profileData.username) { _ in }
                 self.switchToTabBarController()
             case .failure(let error):
-                print("Error occured during profile data loading: \(error)")
-                let alert = UIAlertController(
-                    title: "Что-то пошло не так(",
-                    message: "Не удалось войти в систему",
-                    preferredStyle: .alert)
-                let action = UIAlertAction(title: "ОК", style: .default) { [weak self] _ in
-                    guard let self = self else { return }
-                    self.performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
-                }
-                alert.addAction(action)
-                if self.presentedViewController == nil {
-                    self.present(alert, animated: true, completion: nil)
-                } else {
-                    self.presentedViewController?.present(alert, animated: true, completion: nil)
-                }
+                ErrorLoggingService.shared.log(from: String(describing: self), with: .Network, error: error)
+                self.showErrorAlert(self)
             }
         }
     }
@@ -84,6 +87,9 @@ final class SplashViewController: UIViewController {
 extension SplashViewController: AuthViewControllerDelegate{
     func didAuthenticate(_ vc: AuthViewController) {
         requestProfile()
+    }
+    func showAlert(_ vc: AuthViewController) {
+        showErrorAlert(vc)
     }
 }
 
@@ -94,7 +100,7 @@ extension SplashViewController {
                 let navigationController = segue.destination as? UINavigationController,
                 let viewController = navigationController.viewControllers[0] as? AuthViewController
             else {
-                assertionFailure("Failed to prepare for \(showAuthenticationScreenSegueIdentifier)")
+                ErrorLoggingService.shared.log(from: String(describing: self), with: .SeguePreparation, error: CommonErrors.seguePreparation(showAuthenticationScreenSegueIdentifier))
                 return
             }
             viewController.modalPresentationStyle = .fullScreen

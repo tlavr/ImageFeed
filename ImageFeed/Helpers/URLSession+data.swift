@@ -7,16 +7,6 @@
 
 import UIKit
 
-enum NetworkError: Error {
-    case httpStatusCode(Int)
-    case urlRequestError(Error)
-    case urlSessionError
-}
-
-enum JsonError: Error {
-    case decoderError
-}
-
 extension URLSession {
     func data(
         for request: URLRequest,
@@ -62,5 +52,34 @@ extension URLSession {
             }
         }
         return task
+    }
+}
+
+enum NetworkError: Error {
+    case httpStatusCode(Int)
+    case urlRequestError(Error)
+    case urlSessionError
+}
+
+extension NetworkError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .httpStatusCode(let code):
+            return NSLocalizedString("HTTP status code: \(code)", comment: "HTTP Error")
+        case .urlRequestError(let error):
+            return NSLocalizedString("URL Request Error: \(error.localizedDescription)", comment: "URL Request Error")
+        case .urlSessionError:
+            return NSLocalizedString("URL Session Error", comment: "URL Session Error")
+        }
+    }
+}
+
+enum JsonError: Error {
+    case decoderError
+}
+
+extension JsonError: LocalizedError {
+    public var errorDescription: String? {
+        return NSLocalizedString("JSON Decoder Error", comment: "JSON Decoder Error")
     }
 }
