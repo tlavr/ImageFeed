@@ -11,6 +11,7 @@ final class ProfileViewController: UIViewController {
     // MARK: - Private properties
     private let tokenStorage = OAuth2TokenStorage()
     private let profileStorage = ProfileStorage()
+    private var profileImageServiceObserver: NSObjectProtocol?
     private lazy var profileImageView: UIImageView = {
         let profileImage = UIImage(named: "ProfilePicture")
         let imageView = UIImageView(image: profileImage)
@@ -71,6 +72,17 @@ final class ProfileViewController: UIViewController {
             accountNameLabel.text = userProfile.loginname
             customTextLabel.text = userProfile.bio
         }
+        
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()
+            }
+        updateAvatar()
     }
     
     // MARK: - Private methods
@@ -106,6 +118,15 @@ final class ProfileViewController: UIViewController {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
+    }
+    
+    private func updateAvatar() {
+        guard
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let url = URL(string: profileImageURL)
+        else { return }
+        // TODO [Sprint 11] Обновить аватар, используя Kingfisher
+        print("Loading the avatar image using Kingfisher here. URL is \(profileImageURL)")
     }
     
     @objc

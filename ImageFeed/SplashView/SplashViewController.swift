@@ -58,6 +58,7 @@ final class SplashViewController: UIViewController {
                 self.navigationController?.popViewController(animated: true)
                 print("Profile data has been successfully loaded: \(profileData)")
                 self.profileStorage.store(profile: profileData)
+                ProfileImageService.shared.fetchProfileImageURL(username: profileData.username) { _ in }
                 self.switchToTabBarController()
             case .failure(let error):
                 print("Error occured during profile data loading: \(error)")
