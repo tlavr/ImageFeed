@@ -15,50 +15,40 @@ final class ProfileService {
     private var lastToken: String?
     
     private enum ProfileServiceError: Error {
-        case invalidRequest
-    }
-    private enum JsonError: Error {
-        case decoderError
+        case repeatedRequest
+        case invalidUrlRequest
     }
     
     // MARK: -Public methods
     func fetchProfile(_ token: String, completion: @escaping (Result<ProfileModel, Error>) -> Void) {
         assert(Thread.isMainThread)
         guard lastToken != token else {
-            completion(.failure(ProfileServiceError.invalidRequest))
+            completion(.failure(ProfileServiceError.repeatedRequest))
             return
         }
         task?.cancel()
         lastToken = token
         
-        guard
-            let URLRequest = generateProfileRequest(token)
-        else
-        {
-            completion(.failure(ProfileServiceError.invalidRequest))
+        guard let URLRequest = generateProfileRequest(token) else {
+            completion(.failure(ProfileServiceError.invalidUrlRequest))
             return
         }
         
-        let task = URLSession.shared.data(for: URLRequest) { [weak self] result in
+        let task = URLSession.shared.objectTask(for: URLRequest) { [weak self] (result: Result<ProfileDataResponseBody, Error>) in
             guard let self = self else { return }
             switch result {
-            case .success(let data):
-                do {
-                    let profileData = try JSONDecoder().decode(ProfileDataResponseBody.self, from: data)
-                    let profile = ProfileModel(
-                        userID: profileData.userID,
-                        username: profileData.username,
-                        loginname: "@"+"\(profileData.username)",
-                        firstName: profileData.firstName,
-                        lastName: profileData.lastName ?? "",
-                        name: profileData.firstName + " " + (profileData.lastName ?? ""),
-                        bio: profileData.bio ?? "",
-                        totalPhotos: profileData.totalPhotos ?? 0
-                    )
-                    completion(.success(profile))
-                } catch {
-                    completion(.failure(JsonError.decoderError))
-                }
+            case .success(let profileData):
+                let profile = ProfileModel(
+                    userID: profileData.userID,
+                    username: profileData.username,
+                    loginname: "@"+"\(profileData.username)",
+                    firstName: profileData.firstName,
+                    lastName: profileData.lastName ?? "",
+                    name: profileData.firstName + " " + (profileData.lastName ?? ""),
+                    bio: profileData.bio ?? "",
+                    totalPhotos: profileData.totalPhotos ?? 0
+                )
+                completion(.success(profile))
             case .failure(let error):
                 completion(.failure(error))
             }

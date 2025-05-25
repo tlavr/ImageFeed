@@ -14,42 +14,31 @@ final class OAuth2Service {
     // MARK: - Private properties
     private var task: URLSessionTask?
     private var lastCode: String?
-    
-    private enum JsonError: Error {
-        case decoderError
-    }
-    
     private enum AuthServiceError: Error {
-        case invalidRequest
+        case repeatedRequest
+        case invalidUrlRequest
     }
     
     // MARK: - Public methods
     func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
         guard lastCode != code else {
-            completion(.failure(AuthServiceError.invalidRequest))
+            completion(.failure(AuthServiceError.repeatedRequest))
             return
         }
         task?.cancel()
         lastCode = code
         
-        guard
-            let URLRequest = generateTokenRequest(code: code)
-        else {
-            completion(.failure(AuthServiceError.invalidRequest))
+        guard let URLRequest = generateTokenRequest(code: code) else {
+            completion(.failure(AuthServiceError.invalidUrlRequest))
             return
         }
         
-        let task = URLSession.shared.data(for: URLRequest) { [weak self] result in
+        let task = URLSession.shared.objectTask(for: URLRequest) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
             guard let self = self else { return }
             switch result {
-            case .success(let data):
-                do {
-                    let token = try JSONDecoder().decode(OAuthTokenResponseBody.self, from: data)
-                    completion(.success(token.accessToken))
-                } catch {
-                    completion(.failure(JsonError.decoderError))
-                }
+            case .success(let token):
+                completion(.success(token.accessToken))
             case .failure(let error):
                 completion(.failure(error))
             }

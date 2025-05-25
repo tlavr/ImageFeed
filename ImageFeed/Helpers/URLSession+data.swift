@@ -13,6 +13,10 @@ enum NetworkError: Error {
     case urlSessionError
 }
 
+enum JsonError: Error {
+    case decoderError
+}
+
 extension URLSession {
     func data(
         for request: URLRequest,
@@ -36,6 +40,27 @@ extension URLSession {
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlSessionError))
             }
         })
+        return task
+    }
+    
+    func objectTask<T: Decodable>(
+        for request: URLRequest,
+        completion: @escaping (Result<T, Error>) -> Void
+    ) -> URLSessionTask {
+        let decoder = JSONDecoder()
+        let task = data(for: request) { (result: Result<Data, Error>) in
+            switch result {
+            case .success(let data):
+                do {
+                    let decodedData = try decoder.decode(T.self, from: data)
+                    completion(.success(decodedData))
+                } catch {
+                    completion(.failure(JsonError.decoderError))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
         return task
     }
 }

@@ -20,9 +20,7 @@ final class ProfileImageService {
         case repeatedRequest
         case invalidUrlRequest
     }
-    private enum JsonError: Error {
-        case decoderError
-    }
+    
     //MARK: -Public methods
     func fetchProfileImageURL(username: String, _ completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
@@ -33,30 +31,22 @@ final class ProfileImageService {
         task?.cancel()
         lastUsername = username
         
-        guard
-            let URLRequest = generateProfileImageRequest(username)
-        else
-        {
+        guard let URLRequest = generateProfileImageRequest(username) else {
             completion(.failure(ProfileImageServiceError.invalidUrlRequest))
             return
         }
         
-        let task = URLSession.shared.data(for: URLRequest) { [weak self] result in
+        let task = URLSession.shared.objectTask(for: URLRequest) { [weak self] (result: Result<UserResult, Error>) in
             guard let self = self else { return }
             switch result {
-            case .success(let data):
-                do {
-                    let profileImageData = try JSONDecoder().decode(UserResult.self, from: data)
-                    self.avatarURL = profileImageData.profileImage.small
-                    completion(.success(profileImageData.profileImage.small))
-                    NotificationCenter.default.post(
-                        name: ProfileImageService.didChangeNotification,
-                        object: self,
-                        userInfo: ["URL": self.avatarURL ?? ""]
-                    )
-                } catch {
-                    completion(.failure(JsonError.decoderError))
-                }
+            case .success(let profileImageData):
+                self.avatarURL = profileImageData.profileImage.small
+                completion(.success(profileImageData.profileImage.small))
+                NotificationCenter.default.post(
+                    name: ProfileImageService.didChangeNotification,
+                    object: self,
+                    userInfo: ["URL": self.avatarURL ?? ""]
+                )
             case .failure(let error):
                 completion(.failure(error))
             }
