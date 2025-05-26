@@ -66,6 +66,7 @@ final class ProfileViewController: UIViewController {
     // MARK: - View lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .ypBlack
         addSubviews()
         setupConstraints()
         if let userProfile = profileStorage.getProfile() {
