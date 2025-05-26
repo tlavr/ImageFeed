@@ -59,7 +59,7 @@ extension CommonErrors: LocalizedError {
         case .segueDestination:
             return NSLocalizedString("There is an issue happened during segue destination selection!", comment: "Segue Destination")
         case .tokenStorage:
-            return NSLocalizedString("Token reading from Storage failed!", comment: "Token Storage")
+            return NSLocalizedString("Token Storage error happened!", comment: "Token Storage")
         case .windowConfiguration:
             return NSLocalizedString("Invalid window configuration!", comment: "Window Configuration")
         }

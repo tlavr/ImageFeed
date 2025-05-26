@@ -126,21 +126,16 @@ final class ProfileViewController: UIViewController {
             let profileImageURL = ProfileImageService.shared.avatarURL,
             let imageUrl = URL(string: profileImageURL)
         else { return }
-        // TODO [Sprint 11] Обновить аватар, используя Kingfisher
-        print("Loading the avatar image using Kingfisher here. URL is \(profileImageURL)")
+        
         let processor = RoundCornerImageProcessor(cornerRadius: 61)
         profileImageView.kf.setImage(with: imageUrl,
                                      placeholder: UIImage(named: "ProfileTabActiveImage"),
-                                     options: [.processor(processor)]) { result in
+                                     options: [.processor(processor),
+                                        .cacheSerializer(FormatIndicatedCacheSerializer.png)]) { result in
             switch result {
             case .success(let value):
-                print(value.image)
-                // Откуда картинка загружена:
-                // - .none — из сети.
-                // - .memory — из кэша оперативной памяти.
-                // - .disk — из дискового кэша.
-                print(value.cacheType)
-                print(value.source)
+                print("Image: \(value.image)")
+                print("Loaded from: \(value.cacheType)")
             case .failure(let error):
                 ErrorLoggingService.shared.log(from: String(describing: self), with: .Network, error: error)
             }
@@ -150,5 +145,6 @@ final class ProfileViewController: UIViewController {
     @objc
     private func didTapLogoutButton(_ sender: Any) {
         tokenStorage.reset() // To be replaced in next sprints, only for testing purposes in sprint 10
+        profileStorage.reset()
     }
 }

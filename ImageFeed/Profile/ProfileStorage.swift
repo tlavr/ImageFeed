@@ -6,16 +6,31 @@
 //
 
 import Foundation
+import SwiftKeychainWrapper
 
 final class ProfileStorage {
     // MARK: - Public properties
     var userID: String? {
         get { storage.string(forKey: Keys.userID.rawValue) ?? nil }
-        set { storage.set(newValue, forKey: Keys.userID.rawValue) }
+        set {
+            guard let newValue else { return }
+            let isSuccess = storage.set(newValue, forKey: Keys.userID.rawValue)
+            guard isSuccess else {
+                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                return
+            }
+        }
     }
     var username: String? {
         get { storage.string(forKey: Keys.username.rawValue) ?? nil }
-        set { storage.set(newValue, forKey: Keys.username.rawValue) }
+        set {
+            guard let newValue else { return }
+            let isSuccess = storage.set(newValue, forKey: Keys.username.rawValue)
+            guard isSuccess else {
+                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                return
+            }
+        }
     }
     var loginname: String? {
         get {
@@ -28,11 +43,25 @@ final class ProfileStorage {
     }
     var firstName: String? {
         get { storage.string(forKey: Keys.userFirstName.rawValue) ?? nil }
-        set { storage.set(newValue, forKey: Keys.userFirstName.rawValue) }
+        set {
+            guard let newValue else { return }
+            let isSuccess = storage.set(newValue, forKey: Keys.userFirstName.rawValue)
+            guard isSuccess else {
+                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                return
+            }
+        }
     }
     var lastName: String? {
         get { storage.string(forKey: Keys.userLastName.rawValue) ?? nil }
-        set { storage.set(newValue, forKey: Keys.userLastName.rawValue) }
+        set {
+            guard let newValue else { return }
+            let isSuccess = storage.set(newValue, forKey: Keys.userLastName.rawValue)
+            guard isSuccess else {
+                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                return
+            }
+        }
     }
     var name: String? {
         get {
@@ -46,15 +75,29 @@ final class ProfileStorage {
     }
     var bio: String? {
         get { storage.string(forKey: Keys.userBio.rawValue) ?? nil }
-        set { storage.set(newValue, forKey: Keys.userBio.rawValue) }
+        set {
+            guard let newValue else { return }
+            let isSuccess = storage.set(newValue, forKey: Keys.userBio.rawValue)
+            guard isSuccess else {
+                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                return
+            }
+        }
     }
     var totalPhotos: Int? {
         get { storage.integer(forKey: Keys.userTotalPhotos.rawValue) }
-        set { storage.set(newValue, forKey: Keys.userTotalPhotos.rawValue)}
+        set {
+            guard let newValue else { return }
+            let isSuccess = storage.set(newValue, forKey: Keys.userTotalPhotos.rawValue)
+            guard isSuccess else {
+                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                return
+            }
+        }
     }
     
     // MARK: - Private properties
-    private let storage: UserDefaults = .standard
+    private let storage: KeychainWrapper = .standard
     private enum Keys: String {
         case userID
         case username
@@ -72,6 +115,15 @@ final class ProfileStorage {
         lastName = profile.lastName
         bio = profile.bio
         totalPhotos = profile.totalPhotos
+    }
+    
+    func reset() {
+        storage.removeObject(forKey: Keys.userID.rawValue)
+        storage.removeObject(forKey: Keys.username.rawValue)
+        storage.removeObject(forKey: Keys.userFirstName.rawValue)
+        storage.removeObject(forKey: Keys.userLastName.rawValue)
+        storage.removeObject(forKey: Keys.userBio.rawValue)
+        storage.removeObject(forKey: Keys.userTotalPhotos.rawValue)
     }
     
     func getProfile() -> ProfileModel? {

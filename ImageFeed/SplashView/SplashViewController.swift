@@ -72,7 +72,6 @@ final class SplashViewController: UIViewController {
             switch result {
             case .success(let profileData):
                 self.navigationController?.popViewController(animated: true)
-                print("Profile data has been successfully loaded: \(profileData)")
                 self.profileStorage.store(profile: profileData)
                 ProfileImageService.shared.fetchProfileImageURL(username: profileData.username) { _ in }
                 self.switchToTabBarController()
