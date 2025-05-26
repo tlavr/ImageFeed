@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     // MARK: - Private properties
@@ -123,10 +124,27 @@ final class ProfileViewController: UIViewController {
     private func updateAvatar() {
         guard
             let profileImageURL = ProfileImageService.shared.avatarURL,
-            let url = URL(string: profileImageURL)
+            let imageUrl = URL(string: profileImageURL)
         else { return }
         // TODO [Sprint 11] Обновить аватар, используя Kingfisher
         print("Loading the avatar image using Kingfisher here. URL is \(profileImageURL)")
+        let processor = RoundCornerImageProcessor(cornerRadius: 61)
+        profileImageView.kf.setImage(with: imageUrl,
+                                     placeholder: UIImage(named: "ProfileTabActiveImage"),
+                                     options: [.processor(processor)]) { result in
+            switch result {
+            case .success(let value):
+                print(value.image)
+                // Откуда картинка загружена:
+                // - .none — из сети.
+                // - .memory — из кэша оперативной памяти.
+                // - .disk — из дискового кэша.
+                print(value.cacheType)
+                print(value.source)
+            case .failure(let error):
+                ErrorLoggingService.shared.log(from: String(describing: self), with: .Network, error: error)
+            }
+        }
     }
     
     @objc
