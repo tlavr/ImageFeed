@@ -15,6 +15,13 @@ final class WebViewViewController: UIViewController {
     
     // MARK: -Private properties
     private var estimatedProgressObservation: NSKeyValueObservation?
+    private lazy var backButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: "AuthBackButton"), for: .normal)
+        button.tintColor = .ypBlack
+        button.addTarget(self, action: #selector(didTapBackButton(_:)), for: .touchUpInside)
+        return button
+    } ()
     
     // MARK: - Public properties
     weak var authDelegate: WebViewViewControllerDelegate?
@@ -22,6 +29,7 @@ final class WebViewViewController: UIViewController {
     // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureBackButton()
         loadAuthView()
         webView.navigationDelegate = self
         
@@ -35,11 +43,25 @@ final class WebViewViewController: UIViewController {
     }
     
     // MARK: - IBActions
-    @IBAction private func didTapBackButton(_ sender: Any?) {
+    @objc
+    private func didTapBackButton(_ sender: Any?) {
         authDelegate?.webViewViewControllerDidCancel(self)
     }
     
     // MARK: - Private methods
+    private func configureBackButton() {
+        [backButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
+        NSLayoutConstraint.activate([
+            backButton.widthAnchor.constraint(equalToConstant: 24),
+            backButton.heightAnchor.constraint(equalToConstant: 24),
+            backButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 9),
+            backButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 9)
+        ])
+    }
+    
     private func updateProgress() {
         progressView.progress = Float(webView.estimatedProgress)
         progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
@@ -98,7 +120,7 @@ extension WebViewViewController: WKNavigationDelegate {
         if(error.localizedDescription == "The Internet connection appears to be offline.")
         {
             ErrorLoggingService.shared.log(from: String(describing: self), with: .Network, error: error)
-            authDelegate?.webViewViewControllerDidCancel(self)
+            authDelegate?.showErrorAlert(self)
         }
     }
 }

@@ -19,7 +19,6 @@ final class AuthViewController: UIViewController {
     // MARK: - View lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        configureBackButton()
     }
     
     // MARK: - Public methods
@@ -31,24 +30,34 @@ final class AuthViewController: UIViewController {
                 ErrorLoggingService.shared.log(from: String(describing: self), with: .SeguePreparation, error: CommonErrors.seguePreparation(showWebViewSegueIdentifier))
                 return
             }
+            viewController.modalPresentationStyle = .overFullScreen
             viewController.authDelegate = self
         } else {
             super.prepare(for: segue, sender: sender)
         }
     }
     
-    // MARK: - Private methods
-    private func configureBackButton() {
-        navigationController?.navigationBar.backIndicatorImage = UIImage(named: "AuthBackButton")
-        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "AuthBackButton")
-        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem?.tintColor = .ypBlack
+    func showErrorAlert() {
+        let alert = UIAlertController(
+            title: "Что-то пошло не так(",
+            message: "Не удалось войти в систему",
+            preferredStyle: .alert)
+        let action = UIAlertAction(title: "ОК", style: .default) { [weak alert] _ in
+            guard let alert else { return }
+            alert.dismiss(animated: true)
+        }
+        alert.addAction(action)
+        if self.presentedViewController == nil {
+            self.present(alert, animated: true, completion: nil)
+        } else {
+            self.presentedViewController?.present(alert, animated: true, completion: nil)
+        }
     }
 }
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        navigationController?.popViewController(animated: true)
+        vc.dismiss(animated: true)
         UIBlockingProgressHUD.show()
         oauth2Service.fetchOAuthToken(code: code) { [weak self] result in
             UIBlockingProgressHUD.dismiss()
@@ -63,8 +72,13 @@ extension AuthViewController: WebViewViewControllerDelegate {
         }
     }
     
+    func showErrorAlert(_ vc: WebViewViewController) {
+        vc.dismiss(animated: true)
+        sleep(1)
+        self.showErrorAlert()
+    }
+    
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
-        vc.dismiss(animated: false)
-        delegate?.showAlert(self)
+        vc.dismiss(animated: true)
     }
 }

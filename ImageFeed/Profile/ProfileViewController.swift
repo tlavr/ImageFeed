@@ -145,7 +145,7 @@ final class ProfileViewController: UIViewController {
     
     @objc
     private func didTapLogoutButton(_ sender: Any) {
-        tokenStorage.reset() // To be replaced in next sprints, only for testing purposes in sprint 10
+        tokenStorage.reset() // To be replaced in next sprints, only for testing purposes in sprint 10 and 11
         profileStorage.reset()
     }
 }

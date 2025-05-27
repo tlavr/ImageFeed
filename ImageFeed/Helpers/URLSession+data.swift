@@ -45,7 +45,7 @@ extension URLSession {
                     let decodedData = try decoder.decode(T.self, from: data)
                     completion(.success(decodedData))
                 } catch {
-                    completion(.failure(JsonError.decoderError))
+                    completion(.failure(JsonError.decoderError(data)))
                 }
             case .failure(let error):
                 completion(.failure(error))
@@ -75,11 +75,14 @@ extension NetworkError: LocalizedError {
 }
 
 enum JsonError: Error {
-    case decoderError
+    case decoderError(Data)
 }
 
 extension JsonError: LocalizedError {
     public var errorDescription: String? {
-        return NSLocalizedString("JSON Decoder Error", comment: "JSON Decoder Error")
+        switch self {
+        case .decoderError(let data):
+            return NSLocalizedString("JSON Decoder Error during processing following data: \(String(data: data, encoding: .utf8) ?? "Unable to convert data to string")", comment: "JSON Decoder Error")
+        }
     }
 }

@@ -18,8 +18,26 @@ final class SplashViewController: UIViewController {
     private let tokenStorage = OAuth2TokenStorage()
     private let profileService = ProfileService.shared
     private let profileStorage = ProfileStorage()
+    private var authViewController: AuthViewController?
+    private lazy var splashImageView: UIImageView = {
+        let profileImage = UIImage(named: "SplashScreenImage")
+        let imageView = UIImageView(image: profileImage)
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    } ()
     
     // MARK: - View lifecycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .ypBlack
+        addSubviews()
+        setupConstraints()
+        let storyboard = UIStoryboard(name: "Main", bundle: .main)
+        authViewController = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController
+        authViewController?.delegate = self
+        authViewController?.modalPresentationStyle = .fullScreen
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         setNeedsStatusBarAppearanceUpdate()
@@ -27,11 +45,31 @@ final class SplashViewController: UIViewController {
             requestProfile()
         }
         else {
-            performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
+            guard let authViewController else {
+                ErrorLoggingService.shared.log(from: String(describing: self), with: .ControllerPresentation, error: CommonErrors.controllerPresentation("AuthViewController"))
+                return
+            }
+            present(authViewController, animated: true)
         }
     }
     
     // MARK: - Private methods
+    private func setupConstraints() {
+        NSLayoutConstraint.activate([
+            splashImageView.widthAnchor.constraint(equalToConstant: 75),
+            splashImageView.heightAnchor.constraint(equalToConstant: 77),
+            splashImageView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            splashImageView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
+        ])
+    }
+    
+    private func addSubviews() {
+        [splashImageView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
+    }
+    
     private func switchToTabBarController() {
         guard let window = UIApplication.shared.windows.first else {
             ErrorLoggingService.shared.log(from: String(describing: self), with: .Window, error: CommonErrors.windowConfiguration)
@@ -40,22 +78,6 @@ final class SplashViewController: UIViewController {
         let tabBarController = UIStoryboard(name: "Main", bundle: .main)
             .instantiateViewController(withIdentifier: "TabBarViewController")
         window.rootViewController = tabBarController
-    }
-    
-    private func showErrorAlert(_ vc: UIViewController) {
-        let alert = UIAlertController(
-            title: "Что-то пошло не так(",
-            message: "Не удалось войти в систему",
-            preferredStyle: .alert)
-        let action = UIAlertAction(title: "ОК", style: .default) { [weak alert] _ in
-            guard let alert else { return }
-            alert.dismiss(animated: true)
-        }
-        alert.addAction(action)
-        if self.presentedViewController == nil {
-            self.performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
-        }
-        self.presentedViewController?.present(alert, animated: true, completion: nil)
     }
     
     private func requestProfile() {
@@ -77,7 +99,7 @@ final class SplashViewController: UIViewController {
                 self.switchToTabBarController()
             case .failure(let error):
                 ErrorLoggingService.shared.log(from: String(describing: self), with: .Network, error: error)
-                self.showErrorAlert(self)
+                self.authViewController?.showErrorAlert()
             }
         }
     }
@@ -86,27 +108,5 @@ final class SplashViewController: UIViewController {
 extension SplashViewController: AuthViewControllerDelegate{
     func didAuthenticate(_ vc: AuthViewController) {
         requestProfile()
-    }
-    func showAlert(_ vc: AuthViewController) {
-        showErrorAlert(vc)
-    }
-}
-
-extension SplashViewController {
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == showAuthenticationScreenSegueIdentifier {
-            guard
-                let navigationController = segue.destination as? UINavigationController,
-                let viewController = navigationController.viewControllers[0] as? AuthViewController
-            else {
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .SeguePreparation, error: CommonErrors.seguePreparation(showAuthenticationScreenSegueIdentifier))
-                return
-            }
-            viewController.modalPresentationStyle = .fullScreen
-            viewController.modalTransitionStyle = .crossDissolve
-            viewController.delegate = self
-        } else {
-            super.prepare(for: segue, sender: sender)
-        }
     }
 }

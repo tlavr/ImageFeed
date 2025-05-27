@@ -27,6 +27,7 @@ enum ErrorType {
     case SeguePreparation
     case Database
     case Window
+    case ControllerPresentation
 }
 
 enum CommonErrors: Error {
@@ -39,6 +40,7 @@ enum CommonErrors: Error {
     case segueDestination
     case tokenStorage
     case windowConfiguration
+    case controllerPresentation(String)
 }
 
 extension CommonErrors: LocalizedError {
@@ -62,6 +64,8 @@ extension CommonErrors: LocalizedError {
             return NSLocalizedString("Token Storage error happened!", comment: "Token Storage")
         case .windowConfiguration:
             return NSLocalizedString("Invalid window configuration!", comment: "Window Configuration")
+        case .controllerPresentation(let message):
+            return NSLocalizedString("Error during attempt to present \(message)", comment: "Controller Presentation")
         }
     }
 }
