@@ -14,7 +14,7 @@ final class ProfileViewController: UIViewController {
     private let profileStorage = ProfileStorage()
     private var profileImageServiceObserver: NSObjectProtocol?
     private lazy var profileImageView: UIImageView = {
-        let profileImage = UIImage(named: "ProfilePicture")
+        let profileImage = UIImage(named: "ProfileImagePlaceholder")
         let imageView = UIImageView(image: profileImage)
         imageView.contentMode = .scaleAspectFit
         return imageView
@@ -34,7 +34,7 @@ final class ProfileViewController: UIViewController {
         if let loginname = profileStorage.loginname {
             usernameLabel.text = loginname
         } else {
-            usernameLabel.text = "Екатерина Новикова"
+            usernameLabel.text = ""
         }
         usernameLabel.font = .systemFont(ofSize: 23, weight: .bold)
         usernameLabel.textColor = .ypWhite
@@ -45,7 +45,7 @@ final class ProfileViewController: UIViewController {
         if let name = profileStorage.name {
             accountLabel.text = name
         } else {
-            accountLabel.text = "@ekaterina_nov"
+            accountLabel.text = ""
         }
         accountLabel.font = .systemFont(ofSize: 13, weight: .regular)
         accountLabel.textColor = .ypGray
@@ -56,7 +56,7 @@ final class ProfileViewController: UIViewController {
         if let bio = profileStorage.bio {
             textLabel.text = bio
         } else {
-            textLabel.text = "Hello, world!"
+            textLabel.text = ""
         }
         textLabel.font = .systemFont(ofSize: 13, weight: .regular)
         textLabel.textColor = .ypWhite
@@ -130,7 +130,7 @@ final class ProfileViewController: UIViewController {
         
         let processor = RoundCornerImageProcessor(cornerRadius: 61)
         profileImageView.kf.setImage(with: imageUrl,
-                                     placeholder: UIImage(named: "ProfileTabActiveImage"),
+                                     placeholder: UIImage(named: "ProfileImagePlaceholder"),
                                      options: [.processor(processor),
                                         .cacheSerializer(FormatIndicatedCacheSerializer.png)]) { result in
             switch result {

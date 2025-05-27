@@ -45,15 +45,19 @@ final class SplashViewController: UIViewController {
             requestProfile()
         }
         else {
-            guard let authViewController else {
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .ControllerPresentation, error: CommonErrors.controllerPresentation("AuthViewController"))
-                return
-            }
-            present(authViewController, animated: true)
+            safeAuthViewControllerPresentation()
         }
     }
     
     // MARK: - Private methods
+    private func safeAuthViewControllerPresentation() {
+        guard let authViewController else {
+            ErrorLoggingService.shared.log(from: String(describing: self), with: .ControllerPresentation, error: CommonErrors.controllerPresentation("AuthViewController"))
+            return
+        }
+        present(authViewController, animated: true)
+    }
+    
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             splashImageView.widthAnchor.constraint(equalToConstant: 75),
@@ -99,6 +103,9 @@ final class SplashViewController: UIViewController {
                 self.switchToTabBarController()
             case .failure(let error):
                 ErrorLoggingService.shared.log(from: String(describing: self), with: .Network, error: error)
+                if self.presentedViewController == nil {
+                    self.safeAuthViewControllerPresentation()
+                }
                 self.authViewController?.showErrorAlert()
             }
         }
