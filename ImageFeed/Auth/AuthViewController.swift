@@ -27,7 +27,11 @@ final class AuthViewController: UIViewController {
             guard
                 let viewController = segue.destination as? WebViewViewController
             else {
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .SeguePreparation, error: CommonErrors.seguePreparation(showWebViewSegueIdentifier))
+                ErrorLoggingService.shared.log(
+                    from: String(describing: self),
+                    with: .SeguePreparation,
+                    error: CommonErrors.seguePreparation(showWebViewSegueIdentifier)
+                )
                 return
             }
             viewController.modalPresentationStyle = .overFullScreen
@@ -67,7 +71,11 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 self.tokenStorage.store(token: token)
                 self.delegate?.didAuthenticate(self)
             case .failure(let error):
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .Network, error: error)
+                ErrorLoggingService.shared.log(
+                    from: String(describing: self),
+                    with: .Network,
+                    error: error
+                )
             }
         }
     }

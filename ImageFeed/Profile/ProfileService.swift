@@ -59,35 +59,25 @@ final class ProfileService {
     
     private func generateProfileRequest(_ token: String) -> URLRequest? {
         guard var urlComponents = URLComponents(url: Constants.defaultBaseURL, resolvingAgainstBaseURL: true) else {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.urlComponent)
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.urlComponent
+            )
             return nil
         }
         urlComponents.path = "/me"
         guard let url = urlComponents.url else {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.url)
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.url
+            )
             return nil
         }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue( "Bearer \(token)", forHTTPHeaderField: "Authorization")
         return request
-    }
-}
-
-struct ProfileDataResponseBody: Decodable {
-    let userID: String
-    let username: String
-    let firstName: String
-    let lastName: String?
-    let bio: String?
-    let totalPhotos: Int?
-    
-    private enum CodingKeys: String, CodingKey {
-        case userID = "id"
-        case username = "username"
-        case firstName = "first_name"
-        case lastName = "last_name"
-        case bio = "bio"
-        case totalPhotos = "total_photos"
     }
 }

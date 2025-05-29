@@ -138,7 +138,11 @@ final class ProfileViewController: UIViewController {
                 print("Image: \(value.image)")
                 print("Loaded from: \(value.cacheType)")
             case .failure(let error):
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .Network, error: error)
+                ErrorLoggingService.shared.log(
+                    from: String(describing: self),
+                    with: .Network,
+                    error: error
+                )
             }
         }
     }

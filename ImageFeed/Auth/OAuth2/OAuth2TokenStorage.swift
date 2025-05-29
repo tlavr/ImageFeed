@@ -16,7 +16,11 @@ final class OAuth2TokenStorage {
             guard let newValue else { return }
             let isSuccess = storage.set(newValue, forKey: Keys.authToken.rawValue)
             guard isSuccess else {
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                ErrorLoggingService.shared.log(
+                    from: String(describing: self),
+                    with: .Database,
+                    error: CommonErrors.tokenStorage
+                )
                 return
             }
         }

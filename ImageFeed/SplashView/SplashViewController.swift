@@ -52,7 +52,11 @@ final class SplashViewController: UIViewController {
     // MARK: - Private methods
     private func safeAuthViewControllerPresentation() {
         guard let authViewController else {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .ControllerPresentation, error: CommonErrors.controllerPresentation("AuthViewController"))
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .ControllerPresentation,
+                error: CommonErrors.controllerPresentation("AuthViewController")
+            )
             return
         }
         present(authViewController, animated: true)
@@ -76,7 +80,11 @@ final class SplashViewController: UIViewController {
     
     private func switchToTabBarController() {
         guard let window = UIApplication.shared.windows.first else {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .Window, error: CommonErrors.windowConfiguration)
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .Window,
+                error: CommonErrors.windowConfiguration
+            )
             return
         }
         let tabBarController = UIStoryboard(name: "Main", bundle: .main)
@@ -88,7 +96,11 @@ final class SplashViewController: UIViewController {
         guard
             let token = tokenStorage.token
         else {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .Database,
+                error: CommonErrors.tokenStorage
+            )
             return
         }
         UIBlockingProgressHUD.show()
@@ -102,7 +114,11 @@ final class SplashViewController: UIViewController {
                 ProfileImageService.shared.fetchProfileImageURL(username: profileData.username) { _ in }
                 self.switchToTabBarController()
             case .failure(let error):
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .Network, error: error)
+                ErrorLoggingService.shared.log(
+                    from: String(describing: self),
+                    with: .Network,
+                    error: error
+                )
                 if self.presentedViewController == nil {
                     self.safeAuthViewControllerPresentation()
                 }

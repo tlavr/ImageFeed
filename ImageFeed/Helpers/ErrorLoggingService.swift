@@ -39,6 +39,7 @@ enum CommonErrors: Error {
     case seguePreparation(String)
     case segueDestination
     case tokenStorage
+    case profileStorage
     case windowConfiguration
     case controllerPresentation(String)
 }
@@ -62,6 +63,8 @@ extension CommonErrors: LocalizedError {
             return NSLocalizedString("There is an issue happened during segue destination selection!", comment: "Segue Destination")
         case .tokenStorage:
             return NSLocalizedString("Token Storage error happened!", comment: "Token Storage")
+        case .profileStorage:
+            return NSLocalizedString("Profile Storage error happened!", comment: "Profile Storage")
         case .windowConfiguration:
             return NSLocalizedString("Invalid window configuration!", comment: "Window Configuration")
         case .controllerPresentation(let message):

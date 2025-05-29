@@ -32,7 +32,7 @@ final class ProfileImageService {
             return
         }
         
-        let task = URLSession.shared.objectTask(for: URLRequest) { [weak self] (result: Result<UserResult, Error>) in
+        let task = URLSession.shared.objectTask(for: URLRequest) { [weak self] (result: Result<ProfileImageModel, Error>) in
             guard let self = self else { return }
             switch result {
             case .success(let profileImageData):
@@ -58,41 +58,33 @@ final class ProfileImageService {
     
     private func generateProfileImageRequest(_ username: String) -> URLRequest? {
         guard let token = tokenStorage.token else {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .Database,
+                error: CommonErrors.tokenStorage
+            )
             return nil
         }
         guard var urlComponents = URLComponents(url: Constants.defaultBaseURL, resolvingAgainstBaseURL: true) else {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.urlComponent)
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.urlComponent
+            )
             return nil
         }
         urlComponents.path = "/users/\(username)"
         guard let url = urlComponents.url else {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.url)
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.url
+            )
             return nil
         }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue( "Bearer \(token)", forHTTPHeaderField: "Authorization")
         return request
-    }
-}
-
-struct UserResult: Decodable {
-    let profileImage: ProfileImage
-    
-    private enum CodingKeys: String, CodingKey {
-        case profileImage = "profile_image"
-    }
-}
-
-struct ProfileImage: Decodable {
-    let small: String
-    let medium: String
-    let large: String
-    
-    private enum CodingKeys: String, CodingKey {
-        case small = "small"
-        case medium = "medium"
-        case large = "large"
     }
 }

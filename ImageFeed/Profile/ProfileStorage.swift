@@ -16,7 +16,7 @@ final class ProfileStorage {
             guard let newValue else { return }
             let isSuccess = storage.set(newValue, forKey: Keys.userID.rawValue)
             guard isSuccess else {
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                logProfileStorageError()
                 return
             }
         }
@@ -27,7 +27,7 @@ final class ProfileStorage {
             guard let newValue else { return }
             let isSuccess = storage.set(newValue, forKey: Keys.username.rawValue)
             guard isSuccess else {
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                logProfileStorageError()
                 return
             }
         }
@@ -47,7 +47,7 @@ final class ProfileStorage {
             guard let newValue else { return }
             let isSuccess = storage.set(newValue, forKey: Keys.userFirstName.rawValue)
             guard isSuccess else {
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                logProfileStorageError()
                 return
             }
         }
@@ -58,7 +58,7 @@ final class ProfileStorage {
             guard let newValue else { return }
             let isSuccess = storage.set(newValue, forKey: Keys.userLastName.rawValue)
             guard isSuccess else {
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                logProfileStorageError()
                 return
             }
         }
@@ -79,7 +79,7 @@ final class ProfileStorage {
             guard let newValue else { return }
             let isSuccess = storage.set(newValue, forKey: Keys.userBio.rawValue)
             guard isSuccess else {
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                logProfileStorageError()
                 return
             }
         }
@@ -90,7 +90,7 @@ final class ProfileStorage {
             guard let newValue else { return }
             let isSuccess = storage.set(newValue, forKey: Keys.userTotalPhotos.rawValue)
             guard isSuccess else {
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .Database, error: CommonErrors.tokenStorage)
+                logProfileStorageError()
                 return
             }
         }
@@ -136,5 +136,14 @@ final class ProfileStorage {
                             name: name ?? "",
                             bio: bio ?? "",
                             totalPhotos: totalPhotos ?? 0)
+    }
+    
+    // MARK: -Private methods
+    private func logProfileStorageError() {
+        ErrorLoggingService.shared.log(
+            from: String(describing: self),
+            with: .Database,
+            error: CommonErrors.profileStorage
+        )
     }
 }

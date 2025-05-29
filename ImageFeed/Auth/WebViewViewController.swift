@@ -37,7 +37,7 @@ final class WebViewViewController: UIViewController {
             \.estimatedProgress,
              options: [.new],
              changeHandler: { [weak self] _, _ in
-                 guard let self = self else { return }
+                 guard let self else { return }
                  self.updateProgress()
              })
     }
@@ -69,7 +69,11 @@ final class WebViewViewController: UIViewController {
     
     private func loadAuthView() {
         guard var urlComponents = URLComponents(string: WebViewConstants.unsplashAuthorizeURLString) else {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.urlComponent)
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.urlComponent
+            )
             return
         }
         urlComponents.queryItems = [
@@ -79,7 +83,11 @@ final class WebViewViewController: UIViewController {
             URLQueryItem(name: "scope", value: Constants.accessScope)
         ]
         guard let url = urlComponents.url else {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.url)
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.url
+            )
             return
         }
         let request = URLRequest(url: url)
@@ -119,12 +127,12 @@ extension WebViewViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         if(error.localizedDescription == "The Internet connection appears to be offline.")
         {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .Network, error: error)
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .Network,
+                error: error
+            )
             authDelegate?.showErrorAlert(self)
         }
     }
-}
-
-enum WebViewConstants {
-    static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
 }

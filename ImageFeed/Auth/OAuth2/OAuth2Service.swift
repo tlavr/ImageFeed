@@ -50,7 +50,11 @@ final class OAuth2Service {
     
     private func generateTokenRequest(code: String) -> URLRequest? {
         guard var urlComponents = URLComponents(string: AuthConstants.tokenRequestURLString) else {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.urlComponent)
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.urlComponent
+            )
             return nil
         }
         urlComponents.queryItems = [
@@ -61,7 +65,11 @@ final class OAuth2Service {
             URLQueryItem(name: "grant_type", value: "authorization_code")
         ]
         guard let url = urlComponents.url else {
-            ErrorLoggingService.shared.log(from: String(describing: self), with: .UrlSession, error: CommonErrors.url)
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.url
+            )
             return nil
         }
         var request = URLRequest(url: url)
@@ -69,22 +77,3 @@ final class OAuth2Service {
         return request
     }
 }
-
-enum AuthConstants {
-    static let tokenRequestURLString = "https://unsplash.com/oauth/token"
-}
-
-struct OAuthTokenResponseBody: Decodable {
-    let accessToken: String
-    let tokenType: String
-    let tokenScope: String
-    let createdAt: Int
-    
-    private enum CodingKeys: String, CodingKey {
-        case accessToken = "access_token"
-        case tokenType = "token_type"
-        case tokenScope = "scope"
-        case createdAt = "created_at"
-    }
-}
-
