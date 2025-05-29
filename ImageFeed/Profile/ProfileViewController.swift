@@ -6,13 +6,15 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     // MARK: - Private properties
     private let tokenStorage = OAuth2TokenStorage()
     private let profileStorage = ProfileStorage()
+    private var profileImageServiceObserver: NSObjectProtocol?
     private lazy var profileImageView: UIImageView = {
-        let profileImage = UIImage(named: "ProfilePicture")
+        let profileImage = UIImage(named: "ProfileImagePlaceholder")
         let imageView = UIImageView(image: profileImage)
         imageView.contentMode = .scaleAspectFit
         return imageView
@@ -29,11 +31,10 @@ final class ProfileViewController: UIViewController {
     } ()
     private lazy var usernameLabel: UILabel = {
         let usernameLabel = UILabel()
-        if let name = profileStorage.firstName,
-           let lastName = profileStorage.lastName {
-            usernameLabel.text = name+" "+lastName
+        if let loginname = profileStorage.loginname {
+            usernameLabel.text = loginname
         } else {
-            usernameLabel.text = "Екатерина Новикова"
+            usernameLabel.text = ""
         }
         usernameLabel.font = .systemFont(ofSize: 23, weight: .bold)
         usernameLabel.textColor = .ypWhite
@@ -41,10 +42,10 @@ final class ProfileViewController: UIViewController {
     } ()
     private lazy var accountNameLabel: UILabel = {
         let accountLabel = UILabel()
-        if let username = profileStorage.username {
-            accountNameLabel.text = username
+        if let name = profileStorage.name {
+            accountLabel.text = name
         } else {
-            accountLabel.text = "@ekaterina_nov"
+            accountLabel.text = ""
         }
         accountLabel.font = .systemFont(ofSize: 13, weight: .regular)
         accountLabel.textColor = .ypGray
@@ -52,11 +53,10 @@ final class ProfileViewController: UIViewController {
     } ()
     private lazy var customTextLabel: UILabel = {
         let textLabel = UILabel()
-        if let id = profileStorage.userID,
-           let totalPhotos = profileStorage.totalPhotos {
-            customTextLabel.text = "User with ID \(id) has \(totalPhotos) photos"
+        if let bio = profileStorage.bio {
+            textLabel.text = bio
         } else {
-            textLabel.text = "Hello, world!"
+            textLabel.text = ""
         }
         textLabel.font = .systemFont(ofSize: 13, weight: .regular)
         textLabel.textColor = .ypWhite
@@ -66,23 +66,25 @@ final class ProfileViewController: UIViewController {
     // MARK: - View lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .ypBlack
         addSubviews()
         setupConstraints()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        if let name = profileStorage.firstName,
-           let lastName = profileStorage.lastName {
-            usernameLabel.text = name+" "+lastName
+        if let userProfile = profileStorage.getProfile() {
+            usernameLabel.text = userProfile.name
+            accountNameLabel.text = userProfile.loginname
+            customTextLabel.text = userProfile.bio
         }
-        if let username = profileStorage.username {
-            accountNameLabel.text = username
-        }
-        if let id = profileStorage.userID,
-           let totalPhotos = profileStorage.totalPhotos {
-            customTextLabel.text = "User with ID \(id) has \(totalPhotos) photos"
-        }
+        
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()
+            }
+        updateAvatar()
     }
     
     // MARK: - Private methods
@@ -120,8 +122,34 @@ final class ProfileViewController: UIViewController {
         }
     }
     
+    private func updateAvatar() {
+        guard
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let imageUrl = URL(string: profileImageURL)
+        else { return }
+        
+        let processor = RoundCornerImageProcessor(cornerRadius: 61)
+        profileImageView.kf.setImage(with: imageUrl,
+                                     placeholder: UIImage(named: "ProfileImagePlaceholder"),
+                                     options: [.processor(processor),
+                                        .cacheSerializer(FormatIndicatedCacheSerializer.png)]) { result in
+            switch result {
+            case .success(let value):
+                print("Image: \(value.image)")
+                print("Loaded from: \(value.cacheType)")
+            case .failure(let error):
+                ErrorLoggingService.shared.log(
+                    from: String(describing: self),
+                    with: .Network,
+                    error: error
+                )
+            }
+        }
+    }
+    
     @objc
     private func didTapLogoutButton(_ sender: Any) {
-        tokenStorage.reset() // To be replaced in next sprints, only for testing purposes in sprint 10
+        tokenStorage.reset() // To be replaced in next sprints, only for testing purposes in sprint 10 and 11
+        profileStorage.reset()
     }
 }

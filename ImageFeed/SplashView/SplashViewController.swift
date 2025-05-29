@@ -16,12 +16,28 @@ final class SplashViewController: UIViewController {
     // MARK: - Private properties
     private let showAuthenticationScreenSegueIdentifier = "ShowAuthView"
     private let tokenStorage = OAuth2TokenStorage()
+    private let profileService = ProfileService.shared
     private let profileStorage = ProfileStorage()
-    private enum JsonError: Error {
-        case decoderError
-    }
+    private var authViewController: AuthViewController?
+    private lazy var splashImageView: UIImageView = {
+        let profileImage = UIImage(named: "SplashScreenImage")
+        let imageView = UIImageView(image: profileImage)
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    } ()
     
     // MARK: - View lifecycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .ypBlack
+        addSubviews()
+        setupConstraints()
+        let storyboard = UIStoryboard(name: "Main", bundle: .main)
+        authViewController = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController
+        authViewController?.delegate = self
+        authViewController?.modalPresentationStyle = .fullScreen
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         setNeedsStatusBarAppearanceUpdate()
@@ -29,14 +45,46 @@ final class SplashViewController: UIViewController {
             requestProfile()
         }
         else {
-            performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
+            safeAuthViewControllerPresentation()
         }
     }
     
     // MARK: - Private methods
+    private func safeAuthViewControllerPresentation() {
+        guard let authViewController else {
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .ControllerPresentation,
+                error: CommonErrors.controllerPresentation("AuthViewController")
+            )
+            return
+        }
+        present(authViewController, animated: true)
+    }
+    
+    private func setupConstraints() {
+        NSLayoutConstraint.activate([
+            splashImageView.widthAnchor.constraint(equalToConstant: 75),
+            splashImageView.heightAnchor.constraint(equalToConstant: 77),
+            splashImageView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            splashImageView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
+        ])
+    }
+    
+    private func addSubviews() {
+        [splashImageView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
+    }
+    
     private func switchToTabBarController() {
         guard let window = UIApplication.shared.windows.first else {
-            assertionFailure("Invalid window configuration")
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .Window,
+                error: CommonErrors.windowConfiguration
+            )
             return
         }
         let tabBarController = UIStoryboard(name: "Main", bundle: .main)
@@ -44,76 +92,37 @@ final class SplashViewController: UIViewController {
         window.rootViewController = tabBarController
     }
     
-    private func generateProfileRequest() -> URLRequest? {
-        guard var urlComponents = URLComponents(url: Constants.defaultBaseURL, resolvingAgainstBaseURL: true) else {
-            assertionFailure("Generate profile request URLComponent initialization failed")
-            return nil
-        }
-        urlComponents.path = "/me"
-        guard let url = urlComponents.url else {
-            assertionFailure("Generate token request URL initialization failed")
-            return nil
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        guard let token = tokenStorage.token else {
-            assertionFailure("Token reading from Storage failed")
-            return nil
-        }
-        request.setValue( "Bearer \(token)", forHTTPHeaderField: "Authorization")
-        return request
-    }
-    
-    private func fetchProfileData(completion: @escaping (Result<ProfileModel, Error>) -> Void) {
-        guard let URLRequest = generateProfileRequest() else { return }
-        
-        let task = URLSession.shared.data(for: URLRequest) { result in
-            switch result {
-            case .success(let data):
-                do {
-                    let profileData = try JSONDecoder().decode(ProfileDataResponseBody.self, from: data)
-                    let profile = ProfileModel(
-                        userID: profileData.userID,
-                        username: profileData.username,
-                        firstName: profileData.firstName,
-                        lastName: profileData.lastName ?? "",
-                        totalPhotos: profileData.totalPhotos ?? 0
-                    )
-                    completion(.success(profile))
-                } catch {
-                    completion(.failure(JsonError.decoderError))
-                }
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-        task.resume()
-    }
-    
     private func requestProfile() {
-        fetchProfileData() { [weak self] result in
+        guard
+            let token = tokenStorage.token
+        else {
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .Database,
+                error: CommonErrors.tokenStorage
+            )
+            return
+        }
+        UIBlockingProgressHUD.show()
+        profileService.fetchProfile(token) { [weak self] result in
+            UIBlockingProgressHUD.dismiss()
             guard let self = self else { return }
             switch result {
             case .success(let profileData):
                 self.navigationController?.popViewController(animated: true)
-                print("Profile data has been successfully loaded: \(profileData)")
+                self.profileStorage.store(profile: profileData)
+                ProfileImageService.shared.fetchProfileImageURL(username: profileData.username) { _ in }
                 self.switchToTabBarController()
             case .failure(let error):
-                print("Error occured during profile data loading: \(error)")
-                let alert = UIAlertController(
-                    title: "Что-то пошло не так(",
-                    message: "Не удалось войти в систему",
-                    preferredStyle: .alert)
-                let action = UIAlertAction(title: "ОК", style: .default) { [weak self] _ in
-                    guard let self = self else { return }
-                    self.performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
-                }
-                alert.addAction(action)
+                ErrorLoggingService.shared.log(
+                    from: String(describing: self),
+                    with: .Network,
+                    error: error
+                )
                 if self.presentedViewController == nil {
-                    self.present(alert, animated: true, completion: nil)
-                } else {
-                    self.presentedViewController?.present(alert, animated: true, completion: nil)
+                    self.safeAuthViewControllerPresentation()
                 }
+                self.authViewController?.showErrorAlert()
             }
         }
     }
@@ -122,40 +131,5 @@ final class SplashViewController: UIViewController {
 extension SplashViewController: AuthViewControllerDelegate{
     func didAuthenticate(_ vc: AuthViewController) {
         requestProfile()
-    }
-}
-
-extension SplashViewController {
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == showAuthenticationScreenSegueIdentifier {
-            guard
-                let navigationController = segue.destination as? UINavigationController,
-                let viewController = navigationController.viewControllers[0] as? AuthViewController
-            else {
-                assertionFailure("Failed to prepare for \(showAuthenticationScreenSegueIdentifier)")
-                return
-            }
-            viewController.modalPresentationStyle = .fullScreen
-            viewController.modalTransitionStyle = .crossDissolve
-            viewController.delegate = self
-        } else {
-            super.prepare(for: segue, sender: sender)
-        }
-    }
-}
-
-struct ProfileDataResponseBody: Decodable {
-    let userID: String
-    let username: String
-    let firstName: String
-    let lastName: String?
-    let totalPhotos: Int?
-    
-    private enum CodingKeys: String, CodingKey {
-        case userID = "id"
-        case username = "username"
-        case firstName = "first_name"
-        case lastName = "last_name"
-        case totalPhotos = "total_photos"
     }
 }

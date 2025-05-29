@@ -12,27 +12,36 @@ final class OAuth2Service {
     static let shared = OAuth2Service()
     
     // MARK: - Private properties
-    private enum JsonError: Error {
-        case decoderError
-    }
+    private var task: URLSessionTask?
+    private var lastCode: String?
     
     // MARK: - Public methods
     func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let URLRequest = generateTokenRequest(code: code) else { return }
+        assert(Thread.isMainThread)
+        guard lastCode != code else {
+            completion(.failure(CommonErrors.repeatedRequest))
+            return
+        }
+        task?.cancel()
+        lastCode = code
         
-        let task = URLSession.shared.data(for: URLRequest) { result in
+        guard let URLRequest = generateTokenRequest(code: code) else {
+            completion(.failure(CommonErrors.invalidUrlRequest))
+            return
+        }
+        
+        let task = URLSession.shared.objectTask(for: URLRequest) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
+            guard let self = self else { return }
             switch result {
-            case .success(let data):
-                do {
-                    let token = try JSONDecoder().decode(OAuthTokenResponseBody.self, from: data)
-                    completion(.success(token.accessToken))
-                } catch {
-                    completion(.failure(JsonError.decoderError))
-                }
+            case .success(let token):
+                completion(.success(token.accessToken))
             case .failure(let error):
                 completion(.failure(error))
             }
+            self.task = nil
+            self.lastCode = nil
         }
+        self.task = task
         task.resume()
     }
     
@@ -41,7 +50,11 @@ final class OAuth2Service {
     
     private func generateTokenRequest(code: String) -> URLRequest? {
         guard var urlComponents = URLComponents(string: AuthConstants.tokenRequestURLString) else {
-            assertionFailure("Generate token request URLComponent initialization failed")
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.urlComponent
+            )
             return nil
         }
         urlComponents.queryItems = [
@@ -52,29 +65,15 @@ final class OAuth2Service {
             URLQueryItem(name: "grant_type", value: "authorization_code")
         ]
         guard let url = urlComponents.url else {
-            assertionFailure("Generate token request URL initialization failed")
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.url
+            )
             return nil
         }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         return request
-    }
-}
-
-enum AuthConstants {
-    static let tokenRequestURLString = "https://unsplash.com/oauth/token"
-}
-
-struct OAuthTokenResponseBody: Decodable {
-    let accessToken: String
-    let tokenType: String
-    let tokenScope: String
-    let createdAt: Int
-    
-    private enum CodingKeys: String, CodingKey {
-        case accessToken = "access_token"
-        case tokenType = "token_type"
-        case tokenScope = "scope"
-        case createdAt = "created_at"
     }
 }
