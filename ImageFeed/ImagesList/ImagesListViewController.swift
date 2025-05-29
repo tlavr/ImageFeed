@@ -6,12 +6,14 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ImagesListViewController: UIViewController {
     // MARK: - IBOutlets
     @IBOutlet private var tableView: UITableView!
     
     // MARK: - Private properties
+    private let imagesList = ImagesListService.shared
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
     private let photosName: [String] = Array(0..<20).map{ "\($0)" }
     private lazy var dateFormatter: DateFormatter = {
@@ -36,7 +38,11 @@ final class ImagesListViewController: UIViewController {
                 let viewController = segue.destination as? SingleImageViewController,
                 let indexPath = sender as? IndexPath
             else {
-                ErrorLoggingService.shared.log(from: String(describing: self), with: .SeguePreparation, error: CommonErrors.segueDestination)
+                ErrorLoggingService.shared.log(
+                    from: String(describing: self),
+                    with: .SeguePreparation,
+                    error: CommonErrors.segueDestination
+                )
                 return
             }            
             let image = UIImage(named: photosName[indexPath.row])
@@ -84,5 +90,28 @@ extension ImagesListViewController : UITableViewDelegate {
         let scale = imageViewWidth / imageWidth
         let cellHeight = image.size.height * scale + imageInsets.top + imageInsets.bottom
         return cellHeight
+    }
+    
+    func tableView(
+        _ tableView: UITableView,
+        willDisplay cell: UITableViewCell,
+        forRowAt indexPath: IndexPath
+    ) {
+        if indexPath.row + 1 == imagesList.photos.count {
+            imagesList.fetchPhotosNextPage() { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let photos):
+                    print("Images are updated here!")
+                case .failure(let error):
+                    ErrorLoggingService.shared.log(
+                        from: String(describing: self),
+                        with: .UrlSession,
+                        error: error
+                    )
+                }
+            }
+        }
+        // ... call fetchPhotosNextPage here if indexPath.row + 1 == photos.count
     }
 }
