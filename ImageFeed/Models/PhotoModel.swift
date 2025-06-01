@@ -5,7 +5,7 @@
 //  Created by Timur Lavrukhin on 29.5.2025.
 //
 
-import Foundation
+import UIKit
 
 struct Photo {
     let id: String
@@ -14,6 +14,5 @@ struct Photo {
     let welcomeDescription: String?
     let thumbImageURL: String
     let largeImageURL: String
-    let isLiked: Bool
+    var isLiked: Bool
 }
-

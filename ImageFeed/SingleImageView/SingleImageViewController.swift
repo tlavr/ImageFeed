@@ -19,7 +19,7 @@ final class SingleImageViewController : UIViewController {
     }
     
     // MARK: - IBOutlets
-    @IBOutlet private var imageView: UIImageView!
+    @IBOutlet var imageView: UIImageView!
     @IBOutlet var scrollView: UIScrollView!
     @IBOutlet var shareButton: UIButton!
     

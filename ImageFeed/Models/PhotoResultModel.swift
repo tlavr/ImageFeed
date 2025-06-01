@@ -7,8 +7,6 @@
 
 import Foundation
 
-import Foundation
-
 struct PhotoResult: Decodable {
     let id: String
     let createdAt: String
@@ -43,4 +41,8 @@ struct PhotoURLs: Decodable {
     let regular: String
     let small: String
     let thumb: String
+}
+
+struct LikeResult: Decodable {
+    let photo: PhotoResult
 }

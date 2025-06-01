@@ -8,45 +8,72 @@
 import UIKit
 
 final class ImagesListService {
+    // MARK: -Public properties
     static let shared = ImagesListService()
-    static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
+    // MARK: -Private properies
     private(set) var photos: [Photo] = []
-    
+    private var tokenStorage = OAuth2TokenStorage()
     private var lastLoadedPage: Int? = .zero
-    private var task: URLSessionTask?
+    private var photosRequestTask: URLSessionTask?
+    private var likeChangeTask: URLSessionTask?
+    private var lastLikePhotoId: String?
     private let formatter = ISO8601DateFormatter()
     
-    func fetchPhotosNextPage(completion: @escaping (Result<[PhotoResult], Error>) -> Void) {
+    // MARK: -Public methods
+    func fetchPhotosNextPage(completion: @escaping (Result<[Photo], Error>) -> Void) {
         assert(Thread.isMainThread)
-        task?.cancel()
+        photosRequestTask?.cancel()
         let nextPage = (lastLoadedPage ?? 0) + 1
         guard let URLRequest = generatePhotosRequest(pageNumber: nextPage) else {
             completion(.failure(CommonErrors.invalidUrlRequest))
             return
         }
-        
         let task = URLSession.shared.objectTask(for: URLRequest) { [weak self] (result: Result<[PhotoResult], Error>) in
             guard let self = self else { return }
             switch result {
             case .success(let photos):
+                self.photos = []
                 photos.forEach { self.photos.append(self.getPhoto(from: $0)) }
-                NotificationCenter.default.post(
-                    name: ImagesListService.didChangeNotification,
-                    object: self,
-                    userInfo: ["Photos": self.photos]
-                )
                 self.lastLoadedPage = nextPage
-                completion(.success(photos))
+                completion(.success(self.photos))
             case .failure(let error):
                 completion(.failure(error))
             }
-            self.task = nil
+            self.photosRequestTask = nil
         }
-        self.task = task
+        self.photosRequestTask = task
         task.resume()
     }
     
+    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
+        guard lastLikePhotoId != photoId else {
+            completion(.failure(CommonErrors.repeatedRequest))
+            return
+        }
+        photosRequestTask?.cancel()
+        lastLikePhotoId = photoId
+        
+        guard let URLRequest = generateLikeChangeRequest(for: photoId, with: isLike) else {
+            completion(.failure(CommonErrors.invalidUrlRequest))
+            return
+        }
+        let task = URLSession.shared.objectTask(for: URLRequest) { [weak self] (result: Result<LikeResult, Error>) in
+            guard let self = self else { return }
+            switch result {
+            case .success(_):
+                completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+            self.likeChangeTask = nil
+            self.lastLikePhotoId = nil
+        }
+        self.likeChangeTask = task
+        task.resume()
+    }
+    
+    // MARK: -Private methods
     private init() {}
     
     private func generatePhotosRequest(pageNumber: Int) -> URLRequest? {
@@ -61,7 +88,7 @@ final class ImagesListService {
         urlComponents.path = "/photos"
         urlComponents.queryItems = [
             URLQueryItem(name: "page", value: String(pageNumber)),
-            URLQueryItem(name: "per_page", value: String(ImageListServiceConstants.photosPerPage)),
+            URLQueryItem(name: "per_page", value: String(ImagesListConstants.photosPerPage)),
         ]
         guard let url = urlComponents.url else {
             ErrorLoggingService.shared.log(
@@ -73,7 +100,52 @@ final class ImagesListService {
         }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        //        request.setValue( "Bearer \(token)", forHTTPHeaderField: "Authorization")
+        guard let token = tokenStorage.token else {
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .Database,
+                error: CommonErrors.tokenStorage
+            )
+            return nil
+        }
+        request.setValue( "Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return request
+    }
+    
+    private func generateLikeChangeRequest(for photoId: String, with isLike: Bool) -> URLRequest? {
+        guard var urlComponents = URLComponents(url: Constants.defaultBaseURL, resolvingAgainstBaseURL: true) else {
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.urlComponent
+            )
+            return nil
+        }
+        urlComponents.path = "/photos/\(photoId)/like"
+        guard let url = urlComponents.url else {
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.url
+            )
+            return nil
+        }
+        
+        var request = URLRequest(url: url)
+        if isLike {
+            request.httpMethod = "POST"
+        } else {
+            request.httpMethod = "DELETE"
+        }
+        guard let token = tokenStorage.token else {
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .Database,
+                error: CommonErrors.tokenStorage
+            )
+            return nil
+        }
+        request.setValue( "Bearer \(token)", forHTTPHeaderField: "Authorization")
         return request
     }
     

@@ -47,6 +47,9 @@
                                                     </constraints>
                                                     <state key="normal" title="Button"/>
                                                     <buttonConfiguration key="configuration" style="plain" image="LikeNotActive"/>
+                                                    <connections>
+                                                        <action selector="likeButtonClicked" destination="1Sz-UA-L0b" eventType="touchUpInside" id="amU-bh-yeX"/>
+                                                    </connections>
                                                 </button>
                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="image_bg_gradient" translatesAutoresizingMaskIntoConstraints="NO" id="b04-XF-amR" userLabel="Background gradient">
                                                     <rect key="frame" x="16" y="194" width="361" height="30"/>

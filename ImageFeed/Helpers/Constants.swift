@@ -23,6 +23,6 @@ enum WebViewConstants {
     static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
 }
 
-enum ImageListServiceConstants {
+enum ImagesListConstants {
     static let photosPerPage = 10
 }
