@@ -21,6 +21,14 @@ final class ImagesListService {
     private let formatter = ISO8601DateFormatter()
     
     // MARK: -Public methods
+    func reset() {
+        photos = []
+        lastLoadedPage = .zero
+        photosRequestTask = nil
+        likeChangeTask = nil
+        lastLikePhotoId = nil
+    }
+    
     func fetchPhotosNextPage(completion: @escaping (Result<[Photo], Error>) -> Void) {
         assert(Thread.isMainThread)
         photosRequestTask?.cancel()

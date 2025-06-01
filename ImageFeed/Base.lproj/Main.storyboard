@@ -48,7 +48,7 @@
                                                     <state key="normal" title="Button"/>
                                                     <buttonConfiguration key="configuration" style="plain" image="LikeNotActive"/>
                                                     <connections>
-                                                        <action selector="likeButtonClicked" destination="1Sz-UA-L0b" eventType="touchUpInside" id="amU-bh-yeX"/>
+                                                        <action selector="likeButtonClicked" destination="1Sz-UA-L0b" eventType="touchUpInside" id="qwI-TX-uoo"/>
                                                     </connections>
                                                 </button>
                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="image_bg_gradient" translatesAutoresizingMaskIntoConstraints="NO" id="b04-XF-amR" userLabel="Background gradient">
@@ -296,7 +296,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="U1b-EG-yrm"/>
                     <connections>
-                        <outlet property="imageView" destination="vZO-KL-goK" id="Pa9-GF-Alx"/>
+                        <outlet property="imageView" destination="vZO-KL-goK" id="8pr-Qs-QSb"/>
                         <outlet property="scrollView" destination="oxN-K9-aar" id="iIg-pb-IZE"/>
                         <outlet property="shareButton" destination="uQf-Xr-2x4" id="mLR-oL-X2M"/>
                     </connections>

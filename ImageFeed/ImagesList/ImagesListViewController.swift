@@ -64,25 +64,7 @@ final class ImagesListViewController: UIViewController {
                 )
                 return
             }
-            let processor = RoundCornerImageProcessor(cornerRadius: 16)
-            viewController.imageView.kf.indicatorType = .activity
-            viewController.imageView.kf.setImage(with: largeImageUrl,
-                                                 placeholder: UIImage(named: "ImageStub"),
-                                                 options: [.processor(processor)]) { [weak self] result in
-                guard let self else { return }
-                switch result {
-                case .success(let value):
-                    print(">>> Image: \(value.image)")
-                    print(">>> Loaded from: \(value.cacheType)")
-                    viewController.imageView.image = value.image
-                case .failure(let error):
-                    ErrorLoggingService.shared.log(
-                        from: String(describing: self),
-                        with: .Network,
-                        error: error
-                    )
-                }
-            }
+            viewController.imageURL = largeImageUrl
         } else {
             super.prepare(for: segue, sender: sender)
         }
