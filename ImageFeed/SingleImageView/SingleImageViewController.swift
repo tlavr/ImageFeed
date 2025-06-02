@@ -15,34 +15,51 @@ final class SingleImageViewController : UIViewController {
     @IBOutlet var shareButton: UIButton!
     
     // MARK: - Public properties
-    var imageURL: URL?
+    var imageInfo: Photo?
     
     // MARK: -Private properies
     private var image: UIImage? {
         didSet {
             guard isViewLoaded else { return }
             imageView.image = image
-            if let size = image?.size { imageView.frame.size = size }
+            if !isPlaceholder,
+               let size = imageInfo?.size {
+                imageView.frame.size = size
+            } else {
+                if let imageSize = image?.size { imageView.frame.size = imageSize }
+            }
             if let image { rescaleAndCenterImageInScrollView(image: image) }
         }
     }
+    private var isPlaceholder = true
     
     // MARK: - View lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         shareButton.setTitle("", for: .normal)
-        scrollView.minimumZoomScale = 0.1
+        scrollView.minimumZoomScale = 0.05
         scrollView.maximumZoomScale = 1.25
         
         UIBlockingProgressHUD.show()
+        guard let largeImageStr = imageInfo?.largeImageURL,
+              let largeImageUrl = URL(string: largeImageStr) else {
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.url
+            )
+            self.showErrorAlert()
+            return
+        }
         imageView.kf.indicatorType = .activity
-        imageView.kf.setImage(with: imageURL,
+        imageView.kf.setImage(with: largeImageUrl,
                               placeholder: UIImage(named: "ImageStub"),
                               options: []) { [weak self] result in
             guard let self else { return }
             UIBlockingProgressHUD.dismiss()
             switch result {
             case .success(let value):
+                isPlaceholder = false
                 image = value.image
             case .failure(let error):
                 image = UIImage(named: "ImageStub")
@@ -92,7 +109,13 @@ final class SingleImageViewController : UIViewController {
         let maxZoomScale = scrollView.maximumZoomScale
         view.layoutIfNeeded()
         let visibleRectSize = scrollView.bounds.size
-        let imageSize = image.size
+        let imageSize: CGSize
+        if !isPlaceholder,
+           let size = imageInfo?.size {
+            imageSize = size
+        } else {
+            imageSize = image.size
+        }
         let hScale = visibleRectSize.width / imageSize.width
         let vScale = visibleRectSize.height / imageSize.height
         let scale = min(maxZoomScale, max(minZoomScale, min(hScale, vScale)))

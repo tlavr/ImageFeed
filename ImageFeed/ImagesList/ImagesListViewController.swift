@@ -15,13 +15,8 @@ final class ImagesListViewController: UIViewController {
     // MARK: - Private properties
     private let imagesList = ImagesListService.shared
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
-    private var photos: [Photo] = [] {
-        didSet {
-            if photos.count > oldValue.count {
-                self.updateTableViewAnimated()
-            }
-        }
-    }
+    private var imagesListServiceObserver: NSObjectProtocol?
+    private var photos: [Photo] = []
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .long
@@ -39,6 +34,18 @@ final class ImagesListViewController: UIViewController {
             tableView.isPrefetchingEnabled = false
         }
         requestPhotos()
+        imagesListServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ImagesListService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] notification in
+                guard let self = self else { return }
+                if let newPhotos = notification.userInfo?["Photos"] as? [Photo] {
+                    self.photos = newPhotos
+                    self.updateTableViewAnimated()
+                }
+            }
     }
     
     // MARK: - Public methods
@@ -55,16 +62,7 @@ final class ImagesListViewController: UIViewController {
                 )
                 return
             }
-            let largeImageStr = photos[indexPath.row].largeImageURL
-            guard let largeImageUrl = URL(string: largeImageStr) else {
-                ErrorLoggingService.shared.log(
-                    from: String(describing: self),
-                    with: .UrlSession,
-                    error: CommonErrors.url
-                )
-                return
-            }
-            viewController.imageURL = largeImageUrl
+            viewController.imageInfo = photos[indexPath.row]
         } else {
             super.prepare(for: segue, sender: sender)
         }
@@ -130,8 +128,8 @@ final class ImagesListViewController: UIViewController {
         imagesList.fetchPhotosNextPage() { [weak self] result in
             guard let self else { return }
             switch result {
-            case .success(let photos):
-                self.photos.append(contentsOf: photos)
+            case .success():
+                break
             case .failure(let error):
                 ErrorLoggingService.shared.log(
                     from: String(describing: self),
@@ -139,6 +137,29 @@ final class ImagesListViewController: UIViewController {
                     error: error
                 )
             }
+        }
+    }
+    
+    private func getQueryStringParameter(url: String, param: String) -> String? {
+        guard let url = URLComponents(string: url) else { return nil }
+        return url.queryItems?.first(where: { $0.name == param })?.value
+    }
+    
+    private func showErrorAlert() {
+        let alert = UIAlertController(
+            title: "Что-то пошло не так(",
+            message: "Попробуйте еще раз",
+            preferredStyle: .alert)
+        let action = UIAlertAction(title: "ОК", style: .default) { [weak alert] _ in
+            guard let alert else { return }
+            alert.dismiss(animated: true)
+            self.dismiss(animated: true, completion: nil)
+        }
+        alert.addAction(action)
+        if self.presentedViewController == nil {
+            self.present(alert, animated: true, completion: nil)
+        } else {
+            self.presentedViewController?.present(alert, animated: true, completion: nil)
         }
     }
 }
@@ -209,7 +230,7 @@ extension ImagesListViewController: ImagesListCellDelegate {
                 UIBlockingProgressHUD.dismiss()
             case .failure:
                 UIBlockingProgressHUD.dismiss()
-                // TODO: Показать ошибку с использованием UIAlertController
+                showErrorAlert()
             }
         }
     }

@@ -18,7 +18,7 @@ struct PhotoResult: Decodable {
     let likes: Int
     let likedByUser: Bool
     let description: String?
-    let urls: PhotoURLs
+    let urls: UrlsResult
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -35,7 +35,7 @@ struct PhotoResult: Decodable {
     }
 }
 
-struct PhotoURLs: Decodable {
+struct UrlsResult: Decodable {
     let raw: String
     let full: String
     let regular: String

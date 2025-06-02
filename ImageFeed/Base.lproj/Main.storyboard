@@ -47,9 +47,6 @@
                                                     </constraints>
                                                     <state key="normal" title="Button"/>
                                                     <buttonConfiguration key="configuration" style="plain" image="LikeNotActive"/>
-                                                    <connections>
-                                                        <action selector="likeButtonClicked" destination="1Sz-UA-L0b" eventType="touchUpInside" id="qwI-TX-uoo"/>
-                                                    </connections>
                                                 </button>
                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="image_bg_gradient" translatesAutoresizingMaskIntoConstraints="NO" id="b04-XF-amR" userLabel="Background gradient">
                                                     <rect key="frame" x="16" y="194" width="361" height="30"/>
@@ -241,14 +238,19 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oxN-K9-aar">
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oxN-K9-aar">
                                 <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="0" translatesAutoresizingMaskIntoConstraints="NO" id="vZO-KL-goK" userLabel="Single Image View">
-                                        <rect key="frame" x="0.0" y="0.0" width="800" height="529.5"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="0" translatesAutoresizingMaskIntoConstraints="NO" id="vZO-KL-goK" userLabel="Single Image View">
+                                        <rect key="frame" x="0.0" y="0.0" width="800" height="529.66666666666663"/>
                                     </imageView>
                                 </subviews>
+                                <constraints>
+                                    <constraint firstItem="vZO-KL-goK" firstAttribute="top" secondItem="oxN-K9-aar" secondAttribute="top" id="2lb-xv-dmQ"/>
+                                    <constraint firstAttribute="trailing" secondItem="vZO-KL-goK" secondAttribute="trailing" id="4Er-2r-N1k"/>
+                                    <constraint firstAttribute="bottom" secondItem="vZO-KL-goK" secondAttribute="bottom" id="hOt-zl-EW9"/>
+                                    <constraint firstItem="vZO-KL-goK" firstAttribute="leading" secondItem="oxN-K9-aar" secondAttribute="leading" id="wzM-n1-ye4"/>
+                                </constraints>
                                 <viewLayoutGuide key="contentLayoutGuide" id="eDe-G4-GXX"/>
                                 <viewLayoutGuide key="frameLayoutGuide" id="eUq-uf-LVz"/>
                                 <connections>

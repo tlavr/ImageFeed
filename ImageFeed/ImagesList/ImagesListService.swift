@@ -10,6 +10,7 @@ import UIKit
 final class ImagesListService {
     // MARK: -Public properties
     static let shared = ImagesListService()
+    static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
     // MARK: -Private properies
     private(set) var photos: [Photo] = []
@@ -29,7 +30,7 @@ final class ImagesListService {
         lastLikePhotoId = nil
     }
     
-    func fetchPhotosNextPage(completion: @escaping (Result<[Photo], Error>) -> Void) {
+    func fetchPhotosNextPage(completion: @escaping (Result<Void, Error>) -> Void) {
         assert(Thread.isMainThread)
         photosRequestTask?.cancel()
         let nextPage = (lastLoadedPage ?? 0) + 1
@@ -41,10 +42,14 @@ final class ImagesListService {
             guard let self = self else { return }
             switch result {
             case .success(let photos):
-                self.photos = []
                 photos.forEach { self.photos.append(self.getPhoto(from: $0)) }
+                NotificationCenter.default.post(
+                    name: ImagesListService.didChangeNotification,
+                    object: self,
+                    userInfo: ["Photos": self.photos]
+                )
                 self.lastLoadedPage = nextPage
-                completion(.success(self.photos))
+                completion(.success(()))
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -164,7 +169,7 @@ final class ImagesListService {
             createdAt: formatter.date(from: result.createdAt),
             welcomeDescription: result.description,
             thumbImageURL: result.urls.thumb,
-            largeImageURL: result.urls.full,
+            largeImageURL: result.urls.raw,
             isLiked: result.likedByUser
         )
         return photo

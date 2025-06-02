@@ -134,9 +134,8 @@ final class ProfileViewController: UIViewController {
                                      options: [.processor(processor),
                                                .cacheSerializer(FormatIndicatedCacheSerializer.png)]) { result in
                                                    switch result {
-                                                   case .success(let value):
-                                                       print("Profile image: \(value.image)")
-                                                       print("Loaded from: \(value.cacheType)")
+                                                   case .success(_):
+                                                       break
                                                    case .failure(let error):
                                                        ErrorLoggingService.shared.log(
                                                         from: String(describing: self),
@@ -162,7 +161,6 @@ final class ProfileViewController: UIViewController {
             ProfileLogoutService.shared.logout()
             alert.dismiss(animated: true)
             self.view.window?.rootViewController = SplashViewController()
-            self.view.window?.makeKeyAndVisible()
         }
         alert.addAction(noAction)
         alert.addAction(yesAction)
