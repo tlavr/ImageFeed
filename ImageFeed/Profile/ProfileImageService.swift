@@ -42,8 +42,8 @@ final class ProfileImageService {
             guard let self = self else { return }
             switch result {
             case .success(let profileImageData):
-                self.avatarURL = profileImageData.profileImage.small
-                completion(.success(profileImageData.profileImage.small))
+                self.avatarURL = profileImageData.profileImage.medium
+                completion(.success(profileImageData.profileImage.medium))
                 NotificationCenter.default.post(
                     name: ProfileImageService.didChangeNotification,
                     object: self,

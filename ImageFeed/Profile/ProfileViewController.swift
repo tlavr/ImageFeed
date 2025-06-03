@@ -159,8 +159,8 @@ final class ProfileViewController: UIViewController {
             guard let alert else { return }
             guard let self else { return }
             ProfileLogoutService.shared.logout()
-            alert.dismiss(animated: true)
             self.view.window?.rootViewController = SplashViewController()
+            alert.dismiss(animated: true)
         }
         alert.addAction(noAction)
         alert.addAction(yesAction)

@@ -33,6 +33,7 @@ final class ImagesListViewController: UIViewController {
         if #available(iOS 15.0, *) {
             tableView.isPrefetchingEnabled = false
         }
+        photos = []
         requestPhotos()
         imagesListServiceObserver = NotificationCenter.default
             .addObserver(
