@@ -22,7 +22,7 @@ final class ImagesListViewController: UIViewController {
         formatter.dateStyle = .long
         formatter.timeStyle = .none
         return formatter
-    }()
+    } ()
     
     // MARK: - View lifecycle
     override func viewDidLoad() {
@@ -33,20 +33,16 @@ final class ImagesListViewController: UIViewController {
         if #available(iOS 15.0, *) {
             tableView.isPrefetchingEnabled = false
         }
-        photos = []
-        requestPhotos()
         imagesListServiceObserver = NotificationCenter.default
             .addObserver(
                 forName: ImagesListService.didChangeNotification,
                 object: nil,
                 queue: .main
-            ) { [weak self] notification in
+            ) { [weak self] _ in
                 guard let self = self else { return }
-                if let newPhotos = notification.userInfo?["Photos"] as? [Photo] {
-                    self.photos = newPhotos
-                    self.updateTableViewAnimated()
-                }
+                self.updateTableViewAnimated()
             }
+        requestPhotos()
     }
     
     // MARK: - Public methods
@@ -100,8 +96,11 @@ final class ImagesListViewController: UIViewController {
                 )
             }
         }
-        let imageDate = photos[indexPath.row].createdAt ?? Date()
-        cell.dateLabel.text = dateFormatter.string(from: imageDate)
+        if let imageDate = photos[indexPath.row].createdAt {
+            cell.dateLabel.text = dateFormatter.string(from: imageDate)
+        } else {
+            cell.dateLabel.text = ""
+        }
         cell.likeButton.setTitle("", for: .normal)
         if photos[indexPath.row].isLiked {
             cell.likeButton.setImage(UIImage(named: "LikeActive"), for: .normal)
@@ -111,7 +110,8 @@ final class ImagesListViewController: UIViewController {
     }
     
     private func updateTableViewAnimated() {
-        let oldPhotosCount = photos.count - ImagesListConstants.photosPerPage
+        let oldPhotosCount = photos.count
+        photos = imagesList.photos
         let newPhotosCount = photos.count
         var indexPaths: [IndexPath] = []
         (oldPhotosCount..<newPhotosCount).forEach {

@@ -1,11 +1,11 @@
 {
   "images" : [
     {
+      "filename" : "Logo_of_Unsplash.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Logo_of_Unsplash.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

@@ -37,6 +37,11 @@ final class SingleImageViewController : UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         shareButton.setTitle("", for: .normal)
+        shareButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            shareButton.widthAnchor.constraint(equalToConstant: 51),
+            shareButton.heightAnchor.constraint(equalToConstant: 51)
+        ])
         scrollView.minimumZoomScale = 0.05
         scrollView.maximumZoomScale = 1.25
         

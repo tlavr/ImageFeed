@@ -32,7 +32,9 @@ final class ImagesListService {
     
     func fetchPhotosNextPage(completion: @escaping (Result<Void, Error>) -> Void) {
         assert(Thread.isMainThread)
-        photosRequestTask?.cancel()
+        if photosRequestTask != nil {
+            return
+        }
         let nextPage = (lastLoadedPage ?? 0) + 1
         guard let URLRequest = generatePhotosRequest(pageNumber: nextPage) else {
             completion(.failure(CommonErrors.invalidUrlRequest))
@@ -45,8 +47,7 @@ final class ImagesListService {
                 photos.forEach { self.photos.append(self.getPhoto(from: $0)) }
                 NotificationCenter.default.post(
                     name: ImagesListService.didChangeNotification,
-                    object: self,
-                    userInfo: ["Photos": self.photos]
+                    object: self
                 )
                 self.lastLoadedPage = nextPage
                 completion(.success(()))
@@ -75,6 +76,9 @@ final class ImagesListService {
             guard let self = self else { return }
             switch result {
             case .success(_):
+                if let index = self.photos.firstIndex(where: { $0.id == photoId }) {
+                    self.photos[index].isLiked = !self.photos[index].isLiked
+                }
                 completion(.success(()))
             case .failure(let error):
                 completion(.failure(error))
@@ -163,10 +167,14 @@ final class ImagesListService {
     }
     
     private func getPhoto(from result: PhotoResult) -> Photo {
+        var date: String = ""
+        if let createdAt = result.createdAt {
+            date = createdAt
+        }
         let photo = Photo(
             id: result.id,
             size: CGSize(width: result.width, height: result.height),
-            createdAt: formatter.date(from: result.createdAt),
+            createdAt: formatter.date(from: date),
             welcomeDescription: result.description,
             thumbImageURL: result.urls.regular,
             largeImageURL: result.urls.raw,
