@@ -167,14 +167,10 @@ final class ImagesListService {
     }
     
     private func getPhoto(from result: PhotoResult) -> Photo {
-        var date: String = ""
-        if let createdAt = result.createdAt {
-            date = createdAt
-        }
         let photo = Photo(
             id: result.id,
             size: CGSize(width: result.width, height: result.height),
-            createdAt: formatter.date(from: date),
+            createdAt: result.createdAt.flatMap({ formatter.date(from: $0) }),
             welcomeDescription: result.description,
             thumbImageURL: result.urls.regular,
             largeImageURL: result.urls.raw,
