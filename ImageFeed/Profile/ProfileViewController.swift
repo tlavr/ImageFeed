@@ -132,24 +132,47 @@ final class ProfileViewController: UIViewController {
         profileImageView.kf.setImage(with: imageUrl,
                                      placeholder: UIImage(named: "ProfileImagePlaceholder"),
                                      options: [.processor(processor),
-                                        .cacheSerializer(FormatIndicatedCacheSerializer.png)]) { result in
-            switch result {
-            case .success(let value):
-                print("Image: \(value.image)")
-                print("Loaded from: \(value.cacheType)")
-            case .failure(let error):
-                ErrorLoggingService.shared.log(
-                    from: String(describing: self),
-                    with: .Network,
-                    error: error
-                )
-            }
+                                               .cacheSerializer(FormatIndicatedCacheSerializer.png)]) { result in
+                                                   switch result {
+                                                   case .success(_):
+                                                       break
+                                                   case .failure(let error):
+                                                       ErrorLoggingService.shared.log(
+                                                        from: String(describing: self),
+                                                        with: .Network,
+                                                        error: error
+                                                       )
+                                                   }
+                                               }
+    }
+    
+    private func showLogoutAlert() {
+        let alert = UIAlertController(
+            title: "Пока, пока!",
+            message: "Уверены, что хотите выйти?",
+            preferredStyle: .alert)
+        let noAction = UIAlertAction(title: "Нет", style: .cancel) { [weak alert] _ in
+            guard let alert else { return }
+            alert.dismiss(animated: true)
+        }
+        let yesAction = UIAlertAction(title: "Да", style: .default) { [weak alert, weak self] _ in
+            guard let alert else { return }
+            guard let self else { return }
+            ProfileLogoutService.shared.logout()
+            self.view.window?.rootViewController = SplashViewController()
+            alert.dismiss(animated: true)
+        }
+        alert.addAction(noAction)
+        alert.addAction(yesAction)
+        if self.presentedViewController == nil {
+            self.present(alert, animated: true, completion: nil)
+        } else {
+            self.presentedViewController?.present(alert, animated: true, completion: nil)
         }
     }
     
     @objc
     private func didTapLogoutButton(_ sender: Any) {
-        tokenStorage.reset() // To be replaced in next sprints, only for testing purposes in sprint 10 and 11
-        profileStorage.reset()
+        showLogoutAlert()
     }
 }

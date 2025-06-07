@@ -18,6 +18,12 @@ final class ProfileImageService {
     private var lastUsername: String?
     
     //MARK: -Public methods
+    func reset() {
+        avatarURL = nil
+        task = nil
+        lastUsername = nil
+    }
+    
     func fetchProfileImageURL(username: String, _ completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
         guard lastUsername != username else {
@@ -36,8 +42,8 @@ final class ProfileImageService {
             guard let self = self else { return }
             switch result {
             case .success(let profileImageData):
-                self.avatarURL = profileImageData.profileImage.small
-                completion(.success(profileImageData.profileImage.small))
+                self.avatarURL = profileImageData.profileImage.medium
+                completion(.success(profileImageData.profileImage.medium))
                 NotificationCenter.default.post(
                     name: ProfileImageService.didChangeNotification,
                     object: self,

@@ -6,32 +6,76 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class SingleImageViewController : UIViewController {
+    // MARK: - IBOutlets
+    @IBOutlet var imageView: UIImageView!
+    @IBOutlet var scrollView: UIScrollView!
+    @IBOutlet var shareButton: UIButton!
+    
     // MARK: - Public properties
-    var image: UIImage? {
+    var imageInfo: Photo?
+    
+    // MARK: -Private properies
+    private var image: UIImage? {
         didSet {
             guard isViewLoaded else { return }
             imageView.image = image
-            if let size = image?.size { imageView.frame.size = size }
+            if !isPlaceholder,
+               let size = imageInfo?.size {
+                imageView.frame.size = size
+            } else {
+                if let imageSize = image?.size { imageView.frame.size = imageSize }
+            }
             if let image { rescaleAndCenterImageInScrollView(image: image) }
         }
     }
-    
-    // MARK: - IBOutlets
-    @IBOutlet private var imageView: UIImageView!
-    @IBOutlet var scrollView: UIScrollView!
-    @IBOutlet var shareButton: UIButton!
+    private var isPlaceholder = true
     
     // MARK: - View lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         shareButton.setTitle("", for: .normal)
-        scrollView.minimumZoomScale = 0.1
+        shareButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            shareButton.widthAnchor.constraint(equalToConstant: 51),
+            shareButton.heightAnchor.constraint(equalToConstant: 51)
+        ])
+        scrollView.minimumZoomScale = 0.05
         scrollView.maximumZoomScale = 1.25
-        imageView.image = image
-        if let size = image?.size { imageView.frame.size = size }
-        if let image { rescaleAndCenterImageInScrollView(image: image) }
+        
+        UIBlockingProgressHUD.show()
+        guard let largeImageStr = imageInfo?.largeImageURL,
+              let largeImageUrl = URL(string: largeImageStr) else {
+            ErrorLoggingService.shared.log(
+                from: String(describing: self),
+                with: .UrlSession,
+                error: CommonErrors.url
+            )
+            self.showErrorAlert()
+            return
+        }
+        imageView.kf.indicatorType = .activity
+        imageView.kf.setImage(with: largeImageUrl,
+                              placeholder: UIImage(named: "ImageStub"),
+                              options: []) { [weak self] result in
+            guard let self else { return }
+            UIBlockingProgressHUD.dismiss()
+            switch result {
+            case .success(let value):
+                isPlaceholder = false
+                image = value.image
+            case .failure(let error):
+                image = UIImage(named: "ImageStub")
+                ErrorLoggingService.shared.log(
+                    from: String(describing: self),
+                    with: .Network,
+                    error: error
+                )
+                self.showErrorAlert()
+            }
+        }
     }
     
     // MARK: - IBActions
@@ -47,12 +91,36 @@ final class SingleImageViewController : UIViewController {
     }
     
     // MARK: - Private methods
+    private func showErrorAlert() {
+        let alert = UIAlertController(
+            title: "Что-то пошло не так(",
+            message: "Не удалось войти в систему",
+            preferredStyle: .alert)
+        let action = UIAlertAction(title: "ОК", style: .default) { [weak alert] _ in
+            guard let alert else { return }
+            alert.dismiss(animated: true)
+            self.dismiss(animated: true, completion: nil)
+        }
+        alert.addAction(action)
+        if self.presentedViewController == nil {
+            self.present(alert, animated: true, completion: nil)
+        } else {
+            self.presentedViewController?.present(alert, animated: true, completion: nil)
+        }
+    }
+    
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
         let minZoomScale = scrollView.minimumZoomScale
         let maxZoomScale = scrollView.maximumZoomScale
         view.layoutIfNeeded()
         let visibleRectSize = scrollView.bounds.size
-        let imageSize = image.size
+        let imageSize: CGSize
+        if !isPlaceholder,
+           let size = imageInfo?.size {
+            imageSize = size
+        } else {
+            imageSize = image.size
+        }
         let hScale = visibleRectSize.width / imageSize.width
         let vScale = visibleRectSize.height / imageSize.height
         let scale = min(maxZoomScale, max(minZoomScale, min(hScale, vScale)))
@@ -66,6 +134,7 @@ final class SingleImageViewController : UIViewController {
     }
 }
 
+// MARK: -Extensions
 extension SingleImageViewController: UIScrollViewDelegate {
     func viewForZooming(in scrollView: UIScrollView) -> UIView? { imageView }
     func scrollViewDidEndZooming(_ scrollView: UIScrollView, with: UIView?, atScale: CGFloat){

@@ -28,6 +28,7 @@ enum ErrorType {
     case Database
     case Window
     case ControllerPresentation
+    case ImageProcessing
 }
 
 enum CommonErrors: Error {
@@ -42,6 +43,7 @@ enum CommonErrors: Error {
     case profileStorage
     case windowConfiguration
     case controllerPresentation(String)
+    case imageSize
 }
 
 extension CommonErrors: LocalizedError {
@@ -69,6 +71,8 @@ extension CommonErrors: LocalizedError {
             return NSLocalizedString("Invalid window configuration!", comment: "Window Configuration")
         case .controllerPresentation(let message):
             return NSLocalizedString("Error during attempt to present \(message)", comment: "Controller Presentation")
+        case .imageSize:
+            return NSLocalizedString("Error during image size calculation!", comment: "Image Size")
         }
     }
 }

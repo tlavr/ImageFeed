@@ -15,6 +15,11 @@ final class ProfileService {
     private var lastToken: String?
     
     // MARK: -Public methods
+    func reset() {
+        task = nil
+        lastToken = nil
+    }
+    
     func fetchProfile(_ token: String, completion: @escaping (Result<ProfileModel, Error>) -> Void) {
         assert(Thread.isMainThread)
         guard lastToken != token else {
