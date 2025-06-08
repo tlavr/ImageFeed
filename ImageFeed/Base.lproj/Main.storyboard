@@ -175,7 +175,7 @@
         <!--Web View View Controller-->
         <scene sceneID="meP-27-YyV">
             <objects>
-                <viewController id="cQf-kZ-oHq" customClass="WebViewViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="WebViewViewController" id="cQf-kZ-oHq" customClass="WebViewViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Glo-aW-uBI">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -313,7 +313,7 @@
     </scenes>
     <resources>
         <image name="0" width="800" height="529.5"/>
-        <image name="AuthScreenLogo" width="60" height="60"/>
+        <image name="AuthScreenLogo" width="120" height="120"/>
         <image name="BackButton" width="24" height="24"/>
         <image name="ImagesTabActiveImage" width="30" height="30"/>
         <image name="LikeNotActive" width="42" height="42"/>
