@@ -6,7 +6,7 @@
 //
 
 import UIKit
- 
+
 final class TabBarController: UITabBarController {
     // MARK: -Public methods
     override func awakeFromNib() {

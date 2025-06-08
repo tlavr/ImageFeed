@@ -124,6 +124,7 @@ final class ProfileViewController: UIViewController & ProfileViewControllerProto
             title: "Пока, пока!",
             message: "Уверены, что хотите выйти?",
             preferredStyle: .alert)
+        alert.view.accessibilityIdentifier = "LogoutAlert"
         let noAction = UIAlertAction(title: "Нет", style: .cancel) { [weak alert] _ in
             guard let alert else { return }
             alert.dismiss(animated: true)

@@ -53,7 +53,7 @@ final class ProfileViewTests: XCTestCase {
         XCTAssertEqual(profileViewController.usernameLabel.text, "Name")
     }
     
-    // Test avatar is set from presenter from viewDidLoad OR notification?
+    // Test avatar is set from presenter from viewDidLoad
     func testAvatarSet() {
         // MARK: -Given
         let profileViewController = ProfileViewController()
@@ -66,6 +66,6 @@ final class ProfileViewTests: XCTestCase {
         // MARK: -Then
         XCTAssertTrue(profileViewPresenter.isAvatarSetCalled)
     }
-
+    
 }
 
