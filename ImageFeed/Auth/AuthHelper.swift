@@ -13,6 +13,7 @@ final class AuthHelper: AuthHelperProtocol {
     
     // MARK: -Public methods
     init(configuration: AuthConfiguration = .standard) {
+        #warning("Change to standard before commit!")
         self.configuration = configuration
     }
     

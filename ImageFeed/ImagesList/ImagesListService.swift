@@ -44,7 +44,13 @@ final class ImagesListService {
             guard let self = self else { return }
             switch result {
             case .success(let photos):
-                photos.forEach { self.photos.append(self.getPhoto(from: $0)) }
+                photos.forEach {
+                    let photo = self.getPhoto(from: $0)
+                    // This check is needed to avoid duplicated photos received from Unsplash server (Unsplash backed error)
+                    if self.photos.firstIndex(where: { $0.id == photo.id }) != nil {
+                        self.photos.append(photo)
+                    }
+                }
                 NotificationCenter.default.post(
                     name: ImagesListService.didChangeNotification,
                     object: self

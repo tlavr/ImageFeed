@@ -40,5 +40,14 @@ struct AuthConfiguration {
                                  authURLString: WebViewConstants.unsplashAuthorizeURLString,
                                  defaultBaseURL: Constants.defaultBaseURL)
     }
+    
+    static var testing: AuthConfiguration {
+        return AuthConfiguration(accessKey: "bHBk1N8R9yjpEsfVmIs1BtRCnh6fRrn6ogGBhbPfCGk",
+                                 secretKey: "gaJ3JRfL3VktnwmTnaOvA2Ljd-bllrCYborMQ7Hlr0w",
+                                 redirectURI: Constants.redirectURI,
+                                 accessScope: Constants.accessScope,
+                                 authURLString: WebViewConstants.unsplashAuthorizeURLString,
+                                 defaultBaseURL: Constants.defaultBaseURL)
+    }
 }
 

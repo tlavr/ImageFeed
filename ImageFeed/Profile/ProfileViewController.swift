@@ -27,6 +27,7 @@ final class ProfileViewController: UIViewController {
             target: self,
             action: #selector(self.didTapLogoutButton))
         button.tintColor = .ypRed
+        button.accessibilityIdentifier = "LogoutButton"
         return button
     } ()
     private lazy var usernameLabel: UILabel = {
