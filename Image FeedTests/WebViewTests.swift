@@ -73,7 +73,7 @@ final class WebViewTests: XCTestCase {
         //MARK: -When
         let url = authHelper.authURL()
         guard let urlString = url?.absoluteString else {
-            XCTFail("Авторизационная ссылка собрана неверно")
+            XCTFail("Auth string is uncorrectly constructed!")
             return
         }
 
@@ -89,7 +89,10 @@ final class WebViewTests: XCTestCase {
         //MARK: -Given
         var urlComponents = URLComponents(string: "https://unsplash.com/oauth/authorize/native")!
         urlComponents.queryItems = [URLQueryItem(name: "code", value: "test code")]
-        let url = urlComponents.url!
+        guard let url = urlComponents.url else {
+            XCTFail("Wrong URL!")
+            return
+        }
         let authHelper = AuthHelper()
 
         //MARK: -When

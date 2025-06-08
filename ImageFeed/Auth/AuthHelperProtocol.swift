@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol AuthHelperProtocol {
+protocol AuthHelperProtocol: AnyObject {
     func authRequest() -> URLRequest?
     func code(from url: URL) -> String?
 }
