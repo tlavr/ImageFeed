@@ -21,8 +21,14 @@ final class Image_FeedUITests: XCTestCase {
     
     // MARK: -Public methods
     override func setUpWithError() throws {
+        try super.setUpWithError()
         app.launch()
         continueAfterFailure = false
+    }
+
+    override func tearDownWithError() throws {
+        try super.tearDownWithError()
+        app.terminate()
     }
     
     @MainActor
