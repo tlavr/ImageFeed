@@ -11,7 +11,7 @@ enum UITestsConstants {
 #warning("Update using your own credentials!")
     static let email = "your.email@example.com"
     static let password = "Your Password"
-    static let name: String = "Your Profile Name"
+    static let name: String = "Your Profile Name" // PAY ATTENTION TO SPACES IF ANY
     static let username: String = "@your_profile_username"
 }
 
@@ -66,9 +66,10 @@ final class Image_FeedUITests: XCTestCase {
         let tablesQuery = app.tables
         
         let cell = tablesQuery.children(matching: .cell).element(boundBy: 0)
+        sleep(2)
         cell.swipeUp()
         sleep(2)
-        
+
         let cellToLike = tablesQuery.children(matching: .cell).element(boundBy: 1)
         cellToLike.buttons.firstMatch.tap()
         sleep(2)
