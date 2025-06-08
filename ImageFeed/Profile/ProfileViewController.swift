@@ -8,17 +8,21 @@
 import UIKit
 import Kingfisher
 
-final class ProfileViewController: UIViewController {
-    // MARK: - Private properties
-    private let tokenStorage = OAuth2TokenStorage()
-    private let profileStorage = ProfileStorage()
-    private var profileImageServiceObserver: NSObjectProtocol?
-    private lazy var profileImageView: UIImageView = {
-        let profileImage = UIImage(named: "ProfileImagePlaceholder")
+final class ProfileViewController: UIViewController & ProfileViewControllerProtocol {
+    // MARK: -Public properties
+    var presenter: ProfileViewPresenterProtocol?
+    
+    lazy var profileImageView: UIImageView = {
+        let profileImage = placeholderImage
         let imageView = UIImageView(image: profileImage)
         imageView.contentMode = .scaleAspectFit
         return imageView
     } ()
+    
+    lazy var placeholderImage: UIImage? = UIImage(named: "ProfileImagePlaceholder")
+    
+    // MARK: - Private properties
+    private var profileImageServiceObserver: NSObjectProtocol?
     private lazy var logoutButton: UIButton? = {
         let buttonImage = UIImage(named: "LogOutButton")
         guard let buttonImage else { return nil }
@@ -27,37 +31,28 @@ final class ProfileViewController: UIViewController {
             target: self,
             action: #selector(self.didTapLogoutButton))
         button.tintColor = .ypRed
+        button.accessibilityIdentifier = "LogoutButton"
         return button
     } ()
-    private lazy var usernameLabel: UILabel = {
+    
+    private(set) lazy var usernameLabel: UILabel = {
         let usernameLabel = UILabel()
-        if let loginname = profileStorage.loginname {
-            usernameLabel.text = loginname
-        } else {
-            usernameLabel.text = ""
-        }
+        usernameLabel.text = presenter?.getName()
         usernameLabel.font = .systemFont(ofSize: 23, weight: .bold)
         usernameLabel.textColor = .ypWhite
         return usernameLabel
     } ()
-    private lazy var accountNameLabel: UILabel = {
+    
+    private(set) lazy var accountNameLabel: UILabel = {
         let accountLabel = UILabel()
-        if let name = profileStorage.name {
-            accountLabel.text = name
-        } else {
-            accountLabel.text = ""
-        }
+        accountLabel.text = presenter?.getLogin()
         accountLabel.font = .systemFont(ofSize: 13, weight: .regular)
         accountLabel.textColor = .ypGray
         return accountLabel
     } ()
-    private lazy var customTextLabel: UILabel = {
+    private(set) lazy var customTextLabel: UILabel = {
         let textLabel = UILabel()
-        if let bio = profileStorage.bio {
-            textLabel.text = bio
-        } else {
-            textLabel.text = ""
-        }
+        textLabel.text = presenter?.getBio()
         textLabel.font = .systemFont(ofSize: 13, weight: .regular)
         textLabel.textColor = .ypWhite
         return textLabel
@@ -69,11 +64,9 @@ final class ProfileViewController: UIViewController {
         view.backgroundColor = .ypBlack
         addSubviews()
         setupConstraints()
-        if let userProfile = profileStorage.getProfile() {
-            usernameLabel.text = userProfile.name
-            accountNameLabel.text = userProfile.loginname
-            customTextLabel.text = userProfile.bio
-        }
+        usernameLabel.text = presenter?.getName()
+        accountNameLabel.text = presenter?.getLogin()
+        customTextLabel.text = presenter?.getBio()
         
         profileImageServiceObserver = NotificationCenter.default
             .addObserver(
@@ -123,27 +116,7 @@ final class ProfileViewController: UIViewController {
     }
     
     private func updateAvatar() {
-        guard
-            let profileImageURL = ProfileImageService.shared.avatarURL,
-            let imageUrl = URL(string: profileImageURL)
-        else { return }
-        
-        let processor = RoundCornerImageProcessor(cornerRadius: 61)
-        profileImageView.kf.setImage(with: imageUrl,
-                                     placeholder: UIImage(named: "ProfileImagePlaceholder"),
-                                     options: [.processor(processor),
-                                               .cacheSerializer(FormatIndicatedCacheSerializer.png)]) { result in
-                                                   switch result {
-                                                   case .success(_):
-                                                       break
-                                                   case .failure(let error):
-                                                       ErrorLoggingService.shared.log(
-                                                        from: String(describing: self),
-                                                        with: .Network,
-                                                        error: error
-                                                       )
-                                                   }
-                                               }
+        presenter?.setAvatar()
     }
     
     private func showLogoutAlert() {
@@ -151,6 +124,7 @@ final class ProfileViewController: UIViewController {
             title: "Пока, пока!",
             message: "Уверены, что хотите выйти?",
             preferredStyle: .alert)
+        alert.view.accessibilityIdentifier = "LogoutAlert"
         let noAction = UIAlertAction(title: "Нет", style: .cancel) { [weak alert] _ in
             guard let alert else { return }
             alert.dismiss(animated: true)
@@ -158,7 +132,7 @@ final class ProfileViewController: UIViewController {
         let yesAction = UIAlertAction(title: "Да", style: .default) { [weak alert, weak self] _ in
             guard let alert else { return }
             guard let self else { return }
-            ProfileLogoutService.shared.logout()
+            self.presenter?.performLogout()
             self.view.window?.rootViewController = SplashViewController()
             alert.dismiss(animated: true)
         }
