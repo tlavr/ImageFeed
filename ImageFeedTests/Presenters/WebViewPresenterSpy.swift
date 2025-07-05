@@ -12,11 +12,16 @@ final class WebViewPresenterSpy: WebViewPresenterProtocol {
     var viewDidLoadCalled: Bool = false
     var view: WebViewViewControllerProtocol?
     
+    private(set) var lastProgressValue: Double?
+    
     func viewDidLoad() {
         viewDidLoadCalled = true
+        didUpdateProgressValue(0.75)
     }
     
-    func didUpdateProgressValue(_ newValue: Double) { }
+    func didUpdateProgressValue(_ newValue: Double) {
+        lastProgressValue = newValue
+    }
     
     func code(from url: URL) -> String? {
         return nil

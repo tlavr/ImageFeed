@@ -8,19 +8,19 @@
 @testable import ImageFeed
 import UIKit
 
-final class ImagesListViewPresenterFake: ImagesListViewPresenterProtocol {
-    // MARK: -Public properties
+final class ImagesListViewPresenterMock: ImagesListViewPresenterProtocol {
+    // MARK: Public properties
     weak var view: ImagesListViewControllerProtocol?
+    var checkIfNewPhotosNeededCalledWithIndex: Int?
     var isAddPhotosCalled = false
     var isRequestPhotosCalled = false
-    var dateIsEmpty = true
-    var isLiked = false
     var photos: [Photo] = []
     
-    // MARK: -Private properies
-    private let imagesList = ImagesListService.shared
+    // MARK: Private properies
+    private var dateIsEmpty = true
+    private var isLiked = false
     
-    // MARK: -Public methods
+    // MARK: Public methods
     init(view: ImagesListViewControllerProtocol, dateIsEmpty: Bool = true, isLiked: Bool = false) {
         self.view = view
         self.dateIsEmpty = dateIsEmpty
@@ -63,7 +63,9 @@ final class ImagesListViewPresenterFake: ImagesListViewPresenterProtocol {
         isRequestPhotosCalled = true
     }
     
-    func checkIfNewPhotosNeeded(for index: Int) { }
+    func checkIfNewPhotosNeeded(for index: Int) {
+        checkIfNewPhotosNeededCalledWithIndex = index
+    }
     
     func changeLike(for cell: ImagesListCell, with index: Int) {
         isLiked = !isLiked

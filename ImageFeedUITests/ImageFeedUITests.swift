@@ -9,13 +9,13 @@ import XCTest
 
 enum UITestsConstants {
 #warning("Update using your own credentials!")
-    static let email = "your.email@example.com"
-    static let password = "Your Password"
-    static let name: String = "Your Profile Name" // PAY ATTENTION TO SPACES IF ANY
-    static let username: String = "@your_profile_username"
+    static let email =  "t.lavrukhin@gmail.com" // "your.email@example.com"
+    static let password = "8f7V5b0N" // "Your Password"
+    static let name: String = "Timur" // "Your Profile Name" // PAY ATTENTION TO SPACES IF ANY
+    static let username: String = "@timlive" // "@your_profile_username"
 }
 
-final class Image_FeedUITests: XCTestCase {
+final class ImageFeedUITests: XCTestCase {
     // MARK: -Private properies
     let app = XCUIApplication()
     

@@ -11,43 +11,43 @@ import XCTest
 final class ProfileViewTests: XCTestCase {
     // Test profileImageView has placeholder image initially
     func testProfileImageViewPlaceholder() {
-        // MARK: -Given
+        // Given
         let profileViewController = ProfileViewController()
         
-        // MARK: -When
+        // When
         _ = profileViewController.profileImageView
         
-        // MARK: -Then
+        // Then
         XCTAssertEqual(profileViewController.profileImageView.image, UIImage(named: "ProfileImagePlaceholder"))
     }
     
     
     // Test labels are empty OR correctly filled
     func testProfileEmpty() {
-        // MARK: -Given
+        // Given
         let profileViewController = ProfileViewController()
-        let profileViewPresenter = ProfileViewPresenterFake(view: profileViewController)
+        let profileViewPresenter = ProfileViewPresenterMock(view: profileViewController)
         profileViewController.presenter = profileViewPresenter
         
-        // MARK: -When
+        // When
         profileViewController.viewDidLoad()
         
-        // MARK: -Then
+        // Then
         XCTAssertEqual(profileViewController.accountNameLabel.text, "")
         XCTAssertEqual(profileViewController.customTextLabel.text, "")
         XCTAssertEqual(profileViewController.usernameLabel.text, "")
     }
     
     func testProfileFilled() {
-        // MARK: -Given
+        // Given
         let profileViewController = ProfileViewController()
-        let profileViewPresenter = ProfileViewPresenterFake(view: profileViewController, isProfileFilled: true)
+        let profileViewPresenter = ProfileViewPresenterMock(view: profileViewController, isProfileFilled: true)
         profileViewController.presenter = profileViewPresenter
         
-        // MARK: -When
+        // When
         profileViewController.viewDidLoad()
         
-        // MARK: -Then
+        // Then
         XCTAssertEqual(profileViewController.accountNameLabel.text, "Login")
         XCTAssertEqual(profileViewController.customTextLabel.text, "Bio")
         XCTAssertEqual(profileViewController.usernameLabel.text, "Name")
@@ -55,17 +55,15 @@ final class ProfileViewTests: XCTestCase {
     
     // Test avatar is set from presenter from viewDidLoad
     func testAvatarSet() {
-        // MARK: -Given
+        // Given
         let profileViewController = ProfileViewController()
-        let profileViewPresenter = ProfileViewPresenterFake(view: profileViewController)
+        let profileViewPresenter = ProfileViewPresenterMock(view: profileViewController)
         profileViewController.presenter = profileViewPresenter
         
-        // MARK: -When
+        // When
         profileViewController.viewDidLoad()
         
-        // MARK: -Then
+        // Then
         XCTAssertTrue(profileViewPresenter.isAvatarSetCalled)
     }
-    
 }
-

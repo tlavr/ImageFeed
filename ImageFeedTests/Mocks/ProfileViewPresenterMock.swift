@@ -8,7 +8,7 @@
 @testable import ImageFeed
 import Foundation
 
-final class ProfileViewPresenterFake: ProfileViewPresenterProtocol {
+final class ProfileViewPresenterMock: ProfileViewPresenterProtocol {
     // MARK: -Public properties
     weak var view: ProfileViewControllerProtocol?
     var isProfileFilled = false
