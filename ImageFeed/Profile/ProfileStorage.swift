@@ -67,7 +67,11 @@ final class ProfileStorage {
         get {
             if let firstName = storage.string(forKey: Keys.userFirstName.rawValue),
                let lastName = storage.string(forKey: Keys.userLastName.rawValue) {
-                return "\(firstName) \(lastName)"
+                if lastName == "" {
+                    return "\(firstName)"
+                } else {
+                    return "\(firstName) \(lastName)"
+                }
             } else {
                 return nil
             }

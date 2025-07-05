@@ -41,6 +41,7 @@
                                                 </imageView>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Nox-46-h6g" userLabel="Like Button">
                                                     <rect key="frame" x="333" y="4" width="44" height="44"/>
+                                                    <accessibility key="accessibilityConfiguration" identifier="LikeButton"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="44" id="Po5-Ep-tbk"/>
                                                         <constraint firstAttribute="width" constant="44" id="YNC-8v-OpD"/>
@@ -134,6 +135,7 @@
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="te8-80-jjo" userLabel="LoginButton">
                                 <rect key="frame" x="16" y="680" width="361" height="48"/>
+                                <accessibility key="accessibilityConfiguration" identifier="Authenticate"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="DIb-m5-x2d"/>
                                 </constraints>
@@ -175,7 +177,7 @@
         <!--Web View View Controller-->
         <scene sceneID="meP-27-YyV">
             <objects>
-                <viewController id="cQf-kZ-oHq" customClass="WebViewViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="WebViewViewController" id="cQf-kZ-oHq" customClass="WebViewViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Glo-aW-uBI">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -262,6 +264,7 @@
                             </scrollView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gHs-lj-xUF" userLabel="Back Button">
                                 <rect key="frame" x="8" y="8" width="48" height="48"/>
+                                <accessibility key="accessibilityConfiguration" identifier="SingleImageBackButton"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="48" id="Ue7-Bh-jyf"/>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="48" id="fcz-Py-Gpn"/>
@@ -313,7 +316,7 @@
     </scenes>
     <resources>
         <image name="0" width="800" height="529.5"/>
-        <image name="AuthScreenLogo" width="60" height="60"/>
+        <image name="AuthScreenLogo" width="120" height="120"/>
         <image name="BackButton" width="24" height="24"/>
         <image name="ImagesTabActiveImage" width="30" height="30"/>
         <image name="LikeNotActive" width="42" height="42"/>

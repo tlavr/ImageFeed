@@ -34,6 +34,10 @@ final class AuthViewController: UIViewController {
                 )
                 return
             }
+            let authHelper = AuthHelper()
+            let webViewPresenter = WebViewPresenter(authHelper: authHelper)
+            webViewPresenter.view = viewController
+            viewController.presenter = webViewPresenter
             viewController.modalPresentationStyle = .overFullScreen
             viewController.authDelegate = self
         } else {

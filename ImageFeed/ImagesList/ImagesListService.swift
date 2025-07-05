@@ -44,7 +44,13 @@ final class ImagesListService {
             guard let self = self else { return }
             switch result {
             case .success(let photos):
-                photos.forEach { self.photos.append(self.getPhoto(from: $0)) }
+                photos.forEach {
+                    let photo = self.getPhoto(from: $0)
+                    // This check is needed to avoid duplicated photos received from Unsplash server (Unsplash backend error)
+                    if !self.isPresent(photoId: photo.id) {
+                        self.photos.append(photo)
+                    }
+                }
                 NotificationCenter.default.post(
                     name: ImagesListService.didChangeNotification,
                     object: self
@@ -177,5 +183,13 @@ final class ImagesListService {
             isLiked: result.likedByUser
         )
         return photo
+    }
+    
+    private func isPresent(photoId: String) -> Bool {
+        if self.photos.firstIndex(where: { $0.id == photoId }) != nil {
+            return true
+        } else {
+            return false
+        }
     }
 }
